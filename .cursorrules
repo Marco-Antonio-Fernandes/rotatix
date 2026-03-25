@@ -1,0 +1,29 @@
+# ==========================================
+# REGRAS DE EXECUÇÃO - PROJETO ROTATIX
+# ==========================================
+
+# --- FILOSOFIA DE TRABALHO ---
+- NÃO sugira alternativas arquiteturais. Eu sou o arquiteto, você é o executor.
+- NÃO tente "pensar" em funcionalidades extras. Apenas implemente o que eu pedir.
+- Se eu pedir algo que pareça errado, questione uma única vez de forma curta. Se eu confirmar, execute.
+- Proibido adicionar bibliotecas (dependencies) novas sem minha autorização explícita.
+
+# --- STACK TÉCNICA BLOQUEADA (NÃO MUDE) ---
+- BACKEND: Java 17, Spring Boot 3, JPA/Hibernate, MySQL.
+- FRONTEND: Laravel 11, PHP 8.2+, React (Functional Components), Inertia.js, Tailwind CSS.
+- COMUNICAÇÃO: Frontend chama Backend via Axios em http://localhost:8080.
+
+# --- PADRÕES DE CÓDIGO (OBRIGATÓRIOS) ---
+- No Java: Siga estritamente [Controller -> Service -> Repository -> Entity].
+- No React: Use apenas Tailwind CSS para estilo. Não use Bootstrap ou Material UI.
+- No PHP: Use o Laravel apenas como ponte (Inertia) e para autenticação (Breeze).
+- Nomes de métodos e variáveis de negócio DEVEM ser em Português.
+
+# --- REGRAS DE NEGÓCIO (NÃO INVENTE) ---
+- Regra de Ouro: Máximo de 40 horas semanais por empresa.
+- Rodízio: Ordem sequencial. Uma empresa só volta ao topo após todas as outras do ciclo atual serem usadas.
+
+# --- MODO DE RESPOSTA ---
+- Respostas curtas e focadas no código.
+- Se houver erro, mostre a correção. Não peça desculpas, apenas corrija.
+- Se eu enviar um erro do terminal, resolva o erro sem mudar a estrutura do projeto.
