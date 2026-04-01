@@ -3,28 +3,54 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 
-export default function ResetPassword({ token, email }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        token: token,
-        email: email,
-        password: '',
-        password_confirmation: '',
-    });
+export default function ResetPassword() {
+    const { token } = useParams();
+    const [searchParams] = useSearchParams();
+    const emailFromQuery = searchParams.get('email') ?? '';
 
-    const submit = (e) => {
+    const [email, setEmail] = useState(emailFromQuery);
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        setEmail(emailFromQuery);
+    }, [emailFromQuery]);
+
+    useEffect(() => {
+        document.title = `Nova senha — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
+    }, []);
+
+    const submit = async (e) => {
         e.preventDefault();
+        setProcessing(true);
+        setErrors({});
 
-        post(route('password.store'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        try {
+            await axios.get('/sanctum/csrf-cookie');
+            await axios.post(route('password.store'), {
+                token,
+                email,
+                password,
+                password_confirmation: passwordConfirmation,
+            });
+            window.location.href = route('login', {}, false) + '?status=' + encodeURIComponent('Password reset.');
+        } catch (err) {
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors ?? {});
+            }
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <GuestLayout>
-            <Head title="Reset Password" />
-
             <form onSubmit={submit}>
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
@@ -33,13 +59,13 @@ export default function ResetPassword({ token, email }) {
                         id="email"
                         type="email"
                         name="email"
-                        value={data.email}
+                        value={email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email?.[0]} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
@@ -49,14 +75,14 @@ export default function ResetPassword({ token, email }) {
                         id="password"
                         type="password"
                         name="password"
-                        value={data.password}
+                        value={password}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                         isFocused={true}
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password?.[0]} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
@@ -69,21 +95,27 @@ export default function ResetPassword({ token, email }) {
                         type="password"
                         id="password_confirmation"
                         name="password_confirmation"
-                        value={data.password_confirmation}
+                        value={passwordConfirmation}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                         onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
+                            setPasswordConfirmation(e.target.value)
                         }
                     />
 
                     <InputError
-                        message={errors.password_confirmation}
+                        message={errors.password_confirmation?.[0]}
                         className="mt-2"
                     />
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
+                    <Link
+                        to="/login"
+                        className="rounded-md text-sm text-gray-600 underline"
+                    >
+                        Login
+                    </Link>
                     <PrimaryButton className="ms-4" disabled={processing}>
                         Reset Password
                     </PrimaryButton>

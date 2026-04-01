@@ -8,26 +8,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Inertia\Inertia;
-use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): Response
-    {
-        return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => session('status'),
-        ]);
-    }
-
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request): Response|RedirectResponse
     {
         $request->user()->fill($request->validated());
 
@@ -37,13 +22,17 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'user' => $request->user()->fresh(),
+                'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            ]);
+        }
+
         return Redirect::route('profile.edit');
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request): Response|RedirectResponse
     {
         $request->validate([
             'password' => ['required', 'current_password'],
@@ -57,6 +46,10 @@ class ProfileController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($request->wantsJson()) {
+            return response()->json(['message' => 'Account deleted']);
+        }
 
         return Redirect::to('/');
     }

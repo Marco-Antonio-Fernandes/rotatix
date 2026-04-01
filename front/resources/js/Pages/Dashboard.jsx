@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import { useEffect } from 'react';
 
 const horasSemanaMock = 32;
 const limiteHoras = 40;
@@ -32,6 +32,10 @@ const atividadesRecentesMock = [
 ];
 
 export default function Dashboard() {
+    useEffect(() => {
+        document.title = `Início — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
+    }, []);
+
     return (
         <AuthenticatedLayout
             header={
@@ -45,8 +49,6 @@ export default function Dashboard() {
                 </div>
             }
         >
-            <Head title="Início" />
-
             <div className="py-10">
                 <div className="mx-auto max-w-7xl space-y-8 sm:px-6 lg:px-8">
                     <div className="grid gap-4 md:grid-cols-3">

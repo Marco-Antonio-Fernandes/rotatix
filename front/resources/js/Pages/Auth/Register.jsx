@@ -2,29 +2,53 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
+import { useAuth } from '@/contexts/AuthContext';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
+    const navigate = useNavigate();
+    const { setUser } = useAuth();
 
-    const submit = (e) => {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [processing, setProcessing] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    useEffect(() => {
+        document.title = `Registo — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
+    }, []);
+
+    const submit = async (e) => {
         e.preventDefault();
+        setProcessing(true);
+        setErrors({});
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+        try {
+            await axios.get('/sanctum/csrf-cookie');
+            const { data } = await axios.post(route('register'), {
+                name,
+                email,
+                password,
+                password_confirmation: passwordConfirmation,
+            });
+            setUser(data.user);
+            navigate('/');
+        } catch (err) {
+            if (err.response?.status === 422) {
+                setErrors(err.response.data.errors ?? {});
+            }
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <GuestLayout>
-            <Head title="Register" />
-
             <form onSubmit={submit}>
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
@@ -32,15 +56,15 @@ export default function Register() {
                     <TextInput
                         id="name"
                         name="name"
-                        value={data.name}
+                        value={name}
                         className="mt-1 block w-full"
                         autoComplete="name"
                         isFocused={true}
-                        onChange={(e) => setData('name', e.target.value)}
+                        onChange={(e) => setName(e.target.value)}
                         required
                     />
 
-                    <InputError message={errors.name} className="mt-2" />
+                    <InputError message={errors.name?.[0]} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
@@ -50,14 +74,14 @@ export default function Register() {
                         id="email"
                         type="email"
                         name="email"
-                        value={data.email}
+                        value={email}
                         className="mt-1 block w-full"
                         autoComplete="username"
-                        onChange={(e) => setData('email', e.target.value)}
+                        onChange={(e) => setEmail(e.target.value)}
                         required
                     />
 
-                    <InputError message={errors.email} className="mt-2" />
+                    <InputError message={errors.email?.[0]} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
@@ -67,14 +91,14 @@ export default function Register() {
                         id="password"
                         type="password"
                         name="password"
-                        value={data.password}
+                        value={password}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
-                        onChange={(e) => setData('password', e.target.value)}
+                        onChange={(e) => setPassword(e.target.value)}
                         required
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password?.[0]} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
@@ -87,24 +111,24 @@ export default function Register() {
                         id="password_confirmation"
                         type="password"
                         name="password_confirmation"
-                        value={data.password_confirmation}
+                        value={passwordConfirmation}
                         className="mt-1 block w-full"
                         autoComplete="new-password"
                         onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
+                            setPasswordConfirmation(e.target.value)
                         }
                         required
                     />
 
                     <InputError
-                        message={errors.password_confirmation}
+                        message={errors.password_confirmation?.[0]}
                         className="mt-2"
                     />
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
                     <Link
-                        href={route('login')}
+                        to="/login"
                         className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         Already registered?

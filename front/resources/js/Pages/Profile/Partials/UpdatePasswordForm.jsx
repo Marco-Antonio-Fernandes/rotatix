@@ -3,57 +3,64 @@ import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
-import { useForm } from '@inertiajs/react';
-import { useRef } from 'react';
+import axios from 'axios';
+import { useRef, useState } from 'react';
 
 export default function UpdatePasswordForm({ className = '' }) {
     const passwordInput = useRef();
     const currentPasswordInput = useRef();
 
-    const {
-        data,
-        setData,
-        errors,
-        put,
-        reset,
-        processing,
-        recentlySuccessful,
-    } = useForm({
-        current_password: '',
-        password: '',
-        password_confirmation: '',
-    });
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [errors, setErrors] = useState({});
+    const [processing, setProcessing] = useState(false);
+    const [recentlySuccessful, setRecentlySuccessful] = useState(false);
 
-    const updatePassword = (e) => {
+    const updatePassword = async (e) => {
         e.preventDefault();
+        setProcessing(true);
+        setErrors({});
+        setRecentlySuccessful(false);
 
-        put(route('password.update'), {
-            preserveScroll: true,
-            onSuccess: () => reset(),
-            onError: (errors) => {
-                if (errors.password) {
-                    reset('password', 'password_confirmation');
-                    passwordInput.current.focus();
+        try {
+            await axios.put(route('password.update'), {
+                current_password: currentPassword,
+                password,
+                password_confirmation: passwordConfirmation,
+            });
+            setCurrentPassword('');
+            setPassword('');
+            setPasswordConfirmation('');
+            setRecentlySuccessful(true);
+        } catch (err) {
+            if (err.response?.status === 422) {
+                const errs = err.response.data.errors ?? {};
+                setErrors(errs);
+                if (errs.password) {
+                    setPassword('');
+                    setPasswordConfirmation('');
+                    passwordInput.current?.focus();
                 }
-
-                if (errors.current_password) {
-                    reset('current_password');
-                    currentPasswordInput.current.focus();
+                if (errs.current_password) {
+                    setCurrentPassword('');
+                    currentPasswordInput.current?.focus();
                 }
-            },
-        });
+            }
+        } finally {
+            setProcessing(false);
+        }
     };
 
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
-                    Update Password
+                <h2 className="text-lg font-medium text-zinc-100">
+                    Alterar senha
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
-                    Ensure your account is using a long, random password to stay
-                    secure.
+                <p className="mt-1 text-sm text-zinc-400">
+                    Use uma senha longa e aleatória.
                 </p>
             </header>
 
@@ -67,17 +74,15 @@ export default function UpdatePasswordForm({ className = '' }) {
                     <TextInput
                         id="current_password"
                         ref={currentPasswordInput}
-                        value={data.current_password}
-                        onChange={(e) =>
-                            setData('current_password', e.target.value)
-                        }
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-zinc-700 bg-zinc-800 text-zinc-100"
                         autoComplete="current-password"
                     />
 
                     <InputError
-                        message={errors.current_password}
+                        message={errors.current_password?.[0]}
                         className="mt-2"
                     />
                 </div>
@@ -88,14 +93,14 @@ export default function UpdatePasswordForm({ className = '' }) {
                     <TextInput
                         id="password"
                         ref={passwordInput}
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-zinc-700 bg-zinc-800 text-zinc-100"
                         autoComplete="new-password"
                     />
 
-                    <InputError message={errors.password} className="mt-2" />
+                    <InputError message={errors.password?.[0]} className="mt-2" />
                 </div>
 
                 <div>
@@ -106,23 +111,23 @@ export default function UpdatePasswordForm({ className = '' }) {
 
                     <TextInput
                         id="password_confirmation"
-                        value={data.password_confirmation}
+                        value={passwordConfirmation}
                         onChange={(e) =>
-                            setData('password_confirmation', e.target.value)
+                            setPasswordConfirmation(e.target.value)
                         }
                         type="password"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-zinc-700 bg-zinc-800 text-zinc-100"
                         autoComplete="new-password"
                     />
 
                     <InputError
-                        message={errors.password_confirmation}
+                        message={errors.password_confirmation?.[0]}
                         className="mt-2"
                     />
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <PrimaryButton disabled={processing}>Guardar</PrimaryButton>
 
                     <Transition
                         show={recentlySuccessful}
@@ -131,9 +136,7 @@ export default function UpdatePasswordForm({ className = '' }) {
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">
-                            Saved.
-                        </p>
+                        <p className="text-sm text-zinc-400">Guardado.</p>
                     </Transition>
                 </div>
             </form>

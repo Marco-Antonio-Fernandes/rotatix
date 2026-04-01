@@ -1,25 +1,46 @@
 import PrimaryButton from '@/Components/PrimaryButton';
+import { useAuth } from '@/contexts/AuthContext';
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function VerifyEmail({ status }) {
-    const { post, processing } = useForm({});
+export default function VerifyEmail() {
+    const { setUser } = useAuth();
+    const navigate = useNavigate();
+    const [processing, setProcessing] = useState(false);
+    const [status, setStatus] = useState(null);
 
-    const submit = (e) => {
+    useEffect(() => {
+        document.title = `Verificar email — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
+    }, []);
+
+    const submit = async (e) => {
         e.preventDefault();
+        setProcessing(true);
 
-        post(route('verification.send'));
+        try {
+            await axios.get('/sanctum/csrf-cookie');
+            await axios.post(route('verification.send'));
+            setStatus('verification-link-sent');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+    const sair = async () => {
+        await axios.post(route('logout'));
+        setUser(null);
+        navigate('/login');
     };
 
     return (
         <GuestLayout>
-            <Head title="Email Verification" />
-
             <div className="mb-4 text-sm text-gray-600">
                 Thanks for signing up! Before getting started, could you verify
                 your email address by clicking on the link we just emailed to
-                you? If you didn't receive the email, we will gladly send you
-                another.
+                you? If you didn&apos;t receive the email, we will gladly send
+                you another.
             </div>
 
             {status === 'verification-link-sent' && (
@@ -35,14 +56,13 @@ export default function VerifyEmail({ status }) {
                         Resend Verification Email
                     </PrimaryButton>
 
-                    <Link
-                        href={route('logout')}
-                        method="post"
-                        as="button"
+                    <button
+                        type="button"
+                        onClick={sair}
                         className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                         Log Out
-                    </Link>
+                    </button>
                 </div>
             </form>
         </GuestLayout>

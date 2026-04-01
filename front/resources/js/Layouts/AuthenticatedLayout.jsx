@@ -2,14 +2,22 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
+import { useAuth } from '@/contexts/AuthContext';
+import axios from 'axios';
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
-
+    const { user, setUser } = useAuth();
+    const navigate = useNavigate();
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    const sair = async () => {
+        await axios.post(route('logout'));
+        setUser(null);
+        navigate('/login');
+    };
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100">
@@ -18,24 +26,16 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
+                                <Link to="/">
                                     <ApplicationLogo className="block h-9 w-auto fill-current text-emerald-500" />
                                 </Link>
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
+                                <NavLink to="/" end>
                                     Início
                                 </NavLink>
-                                <NavLink
-                                    href={route('empresas.index')}
-                                    active={route().current('empresas.*')}
-                                >
-                                    Empresas
-                                </NavLink>
+                                <NavLink to="/empresas">Empresas</NavLink>
                             </div>
                         </div>
 
@@ -48,7 +48,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm font-medium leading-4 text-zinc-300 transition duration-150 ease-in-out hover:text-emerald-400 focus:outline-none"
                                             >
-                                                {user.name}
+                                                {user?.name}
 
                                                 <svg
                                                     className="-me-0.5 ms-2 h-4 w-4"
@@ -67,18 +67,16 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content contentClasses="py-1 bg-zinc-900 border border-zinc-800">
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
+                                        <Dropdown.Link to="/profile">
                                             Perfil
                                         </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
+                                        <button
+                                            type="button"
+                                            onClick={sair}
+                                            className="block w-full px-4 py-2 text-start text-sm leading-5 text-zinc-200 transition duration-150 ease-in-out hover:bg-zinc-800 hover:text-emerald-400 focus:bg-zinc-800 focus:outline-none"
                                         >
                                             Sair
-                                        </Dropdown.Link>
+                                        </button>
                                     </Dropdown.Content>
                                 </Dropdown>
                             </div>
@@ -134,16 +132,10 @@ export default function AuthenticatedLayout({ header, children }) {
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
+                        <ResponsiveNavLink to="/" end>
                             Início
                         </ResponsiveNavLink>
-                        <ResponsiveNavLink
-                            href={route('empresas.index')}
-                            active={route().current('empresas.*')}
-                        >
+                        <ResponsiveNavLink to="/empresas">
                             Empresas
                         </ResponsiveNavLink>
                     </div>
@@ -151,24 +143,24 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="border-t border-zinc-800 pb-1 pt-4">
                         <div className="px-4">
                             <div className="text-base font-medium text-zinc-200">
-                                {user.name}
+                                {user?.name}
                             </div>
                             <div className="text-sm font-medium text-zinc-500">
-                                {user.email}
+                                {user?.email}
                             </div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
+                            <ResponsiveNavLink to="/profile">
                                 Perfil
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
+                            <button
+                                type="button"
+                                onClick={sair}
+                                className="flex w-full items-start border-l-4 border-transparent py-2 pe-4 ps-3 text-base font-medium text-zinc-400 transition duration-150 ease-in-out hover:border-zinc-600 hover:bg-zinc-800/60 hover:text-zinc-100 focus:border-zinc-600 focus:bg-zinc-800/60 focus:text-zinc-100 focus:outline-none"
                             >
                                 Sair
-                            </ResponsiveNavLink>
+                            </button>
                         </div>
                     </div>
                 </div>
