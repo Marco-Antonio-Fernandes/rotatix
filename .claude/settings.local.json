@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php --version)",
+      "Bash(composer --version)",
+      "Bash(curl -s --max-time 5 https://api.aiven.io)",
+      "Bash(php artisan:*)"
+    ]
+  },
+  "outputStyle": "default"
+}
