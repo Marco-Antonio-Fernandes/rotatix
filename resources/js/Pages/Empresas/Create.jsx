@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatarCnpjDigitando, formatarTelefoneBrDigitando } from '@/utils/mascaras';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -76,14 +77,41 @@ export default function EmpresasCreate() {
                                 <input value={form.nome_fantasia} onChange={set('nome_fantasia')} className={inputCls} />
                             </Campo>
                             <Campo label="CNPJ *" erro={erros.cnpj?.[0]}>
-                                <input value={form.cnpj} onChange={set('cnpj')} className={inputCls} placeholder="00.000.000/0000-00" required />
+                                <input
+                                    value={form.cnpj}
+                                    onChange={(e) =>
+                                        setForm((p) => ({
+                                            ...p,
+                                            cnpj: formatarCnpjDigitando(e.target.value),
+                                        }))
+                                    }
+                                    className={inputCls}
+                                    placeholder="00.000.000/0000-00"
+                                    inputMode="numeric"
+                                    autoComplete="off"
+                                    maxLength={18}
+                                    required
+                                />
                             </Campo>
                             <div className="grid grid-cols-2 gap-3">
                                 <Campo label="E-mail" erro={erros.email?.[0]}>
                                     <input type="email" value={form.email} onChange={set('email')} className={inputCls} />
                                 </Campo>
                                 <Campo label="Telefone" erro={erros.telefone?.[0]}>
-                                    <input value={form.telefone} onChange={set('telefone')} className={inputCls} />
+                                    <input
+                                        value={form.telefone}
+                                        onChange={(e) =>
+                                            setForm((p) => ({
+                                                ...p,
+                                                telefone: formatarTelefoneBrDigitando(e.target.value),
+                                            }))
+                                        }
+                                        className={inputCls}
+                                        placeholder="(00) 00000-0000"
+                                        inputMode="tel"
+                                        autoComplete="tel"
+                                        maxLength={15}
+                                    />
                                 </Campo>
                             </div>
                             <Campo label="Responsável Técnico" erro={erros.responsavel_tecnico?.[0]}>

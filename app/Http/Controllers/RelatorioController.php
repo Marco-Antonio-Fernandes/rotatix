@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\AuditLog;
 use App\Models\Empresa;
 use App\Models\Impedimento;
 use App\Models\LancamentoHora;
 use App\Models\Servico;
+use App\Services\RotacaoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RelatorioController extends Controller
 {
+    public function __construct(
+        private readonly RotacaoService $rotacaoService
+    ) {}
+
     public function prestadoresPorCategoria(): JsonResponse
     {
         $dados = Empresa::with('segmento')
@@ -27,11 +34,21 @@ class RelatorioController extends Controller
         return response()->json(Servico::with('segmento')->get());
     }
 
-    public function statusRotacao(): JsonResponse
+    public function resetarSemana(): JsonResponse
     {
-        return response()->json(
-            Empresa::orderBy('posicao_fila')->get(['id', 'razao_social', 'posicao_fila', 'horas_semana', 'ciclo_concluido'])
-        );
+        $n = $this->rotacaoService->resetarContadoresSemanais();
+
+        AuditLog::create([
+            'user_id'     => Auth::id(),
+            'acao'        => 'reset_semana',
+            'tabela'      => 'empresas',
+            'registro_id' => 0,
+        ]);
+
+        return response()->json([
+            'message'              => 'Contadores semanais zerados.',
+            'empresas_atualizadas' => $n,
+        ]);
     }
 
     public function impedimentos(): JsonResponse

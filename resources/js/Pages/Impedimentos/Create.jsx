@@ -23,7 +23,7 @@ export default function ImpedimentosCreate() {
 
     const [form, setForm] = useState({
         empresa_id: empresaIdInicial,
-        descricao: '',
+        justificativa: '',
         data: new Date().toISOString().split('T')[0],
     });
     const [empresas, setEmpresas] = useState([]);
@@ -74,10 +74,10 @@ export default function ImpedimentosCreate() {
                             <Campo label="Data *" erro={erros.data?.[0]}>
                                 <input type="date" value={form.data} onChange={set('data')} className={inputCls} required />
                             </Campo>
-                            <Campo label="Descrição *" erro={erros.descricao?.[0]}>
+                            <Campo label="Justificativa *" erro={erros.justificativa?.[0]}>
                                 <textarea
-                                    value={form.descricao}
-                                    onChange={set('descricao')}
+                                    value={form.justificativa}
+                                    onChange={set('justificativa')}
                                     className={inputCls}
                                     rows={4}
                                     placeholder="Descreva o impedimento…"

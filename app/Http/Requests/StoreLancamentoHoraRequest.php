@@ -19,6 +19,7 @@ class StoreLancamentoHoraRequest extends FormRequest
             'empresa_id' => ['required', 'exists:empresas,id'],
             'data'       => ['required', 'date'],
             'horas'      => ['required', 'numeric', 'min:0.1', 'max:24'],
+            'servico'    => ['nullable', 'string', 'max:255'],
         ];
     }
 }

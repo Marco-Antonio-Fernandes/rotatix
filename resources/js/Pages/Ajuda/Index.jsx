@@ -2,8 +2,7 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useEffect, useState } from 'react';
 
 const ABAS = [
-    { id: 'horas', label: 'Registro de Horas' },
-    { id: 'rotacao', label: 'Manual do Rodízio' },
+    { id: 'horas', label: 'Registro de Horas e Rodízio' },
     { id: 'impedimento', label: 'Impedimentos' },
 ];
 
@@ -41,8 +40,18 @@ function GuiaHoras() {
             <Secao titulo="O que é o Registro de Horas?">
                 <p>
                     Cada visita ou serviço prestado a uma empresa deve ser registrado com a quantidade
-                    de horas trabalhadas. O sistema acumula essas horas semanalmente e controla o
-                    rodízio de acordo com o limite de 40h por empresa.
+                    de horas trabalhadas. O sistema acumula essas horas no período semanal (até 40h por
+                    empresa) e controla a fila por segmento.
+                </p>
+            </Secao>
+
+            <Secao titulo="Rodízio e fila">
+                <p>
+                    A fila é por ordem de serviço: quem registra horas vai para o fim do segmento. Com 40h no
+                    período atual, a empresa fica fora da vez até alguém usar{' '}
+                    <span className="font-medium text-zinc-100">Relatórios → Resetar contadores da semana</span>{' '}
+                    (depois de exportar o que precisar). Acompanhe a fila e as horas na página{' '}
+                    <span className="font-medium text-zinc-100">Início</span>.
                 </p>
             </Secao>
 
@@ -60,8 +69,17 @@ function GuiaHoras() {
                     Máximo de 24h por lançamento individual. Use múltiplos lançamentos para períodos maiores.
                 </p>
                 <p>
-                    Ao atingir 40h acumuladas, a empresa é marcada como "Ciclo concluído" e sai do rodízio ativo.
+                    Ao atingir 40h no período, a empresa sai da vez até o reset semanal em Relatórios. O histórico
+                    de lançamentos não é apagado.
                 </p>
+            </Secao>
+
+            <Secao titulo="Segmentos">
+                <p>
+                    Segmentos agrupam empresas por área (ex.: limpeza, TI). O rodízio é independente por
+                    segmento.
+                </p>
+                <Alerta texto="Remover um segmento desassocia as empresas; elas não são excluídas." />
             </Secao>
 
             <Secao titulo="Dúvidas frequentes">
@@ -79,49 +97,6 @@ function GuiaHoras() {
                         </p>
                     </div>
                 </div>
-            </Secao>
-        </div>
-    );
-}
-
-function GuiaRotacao() {
-    return (
-        <div className="space-y-4">
-            <Secao titulo="O que é o Rodízio?">
-                <p>
-                    O rodízio é o mecanismo que distribui equitativamente o tempo de serviço entre as
-                    empresas cadastradas em um mesmo segmento. Cada empresa tem direito a até{' '}
-                    <span className="font-semibold text-zinc-100">40 horas semanais</span>. Ao atingir
-                    esse limite, ela sai da fila e a próxima assume.
-                </p>
-            </Secao>
-
-            <Secao titulo="Como funciona a fila">
-                <Passo numero="1" texto="As empresas são ordenadas dentro do segmento por horas acumuladas (menor → maior)." />
-                <Passo numero="2" texto='A empresa no topo da fila com menos de 40h é marcada como "Próxima".' />
-                <Passo numero="3" texto="Ao registrar horas, o sistema valida se a empresa está na vez. Fora da ordem é bloqueado." />
-                <Passo numero="4" texto="Ao atingir 40h, a empresa fica com status Ciclo Concluído e sai da fila ativa." />
-                <Passo numero="5" texto="O administrador pode resetar o ciclo manualmente ao início de cada semana." />
-            </Secao>
-
-            <Secao titulo="Painel de Rotação">
-                <p>
-                    Acesse <span className="font-medium text-zinc-100">Rotação</span> no menu para visualizar:
-                </p>
-                <ul className="list-inside list-disc space-y-1 text-zinc-400">
-                    <li>Todas as empresas por segmento com barra de horas</li>
-                    <li>Qual empresa está "Próxima" no rodízio</li>
-                    <li>Quantas empresas completaram o ciclo</li>
-                    <li>Acesso rápido para registrar horas diretamente do painel</li>
-                </ul>
-            </Secao>
-
-            <Secao titulo="Criando segmentos">
-                <p>
-                    Segmentos agrupam empresas por área de atuação (ex: Limpeza, Jardinagem, TI).
-                    O rodízio é independente por segmento.
-                </p>
-                <Alerta texto="Remover um segmento remove a associação das empresas. As empresas não são excluídas." />
             </Secao>
         </div>
     );
@@ -161,9 +136,9 @@ function GuiaImpedimento() {
 
             <Secao titulo="Efeito no rodízio">
                 <p>
-                    Um impedimento registrado <span className="font-medium text-zinc-100">não</span>{' '}
-                    avança automaticamente a fila. O administrador deve avaliar caso a caso se a empresa
-                    permanece na posição atual ou é movida para o final do ciclo.
+                    Em <span className="font-medium text-zinc-100">Início</span> ou ao registrar horas, marcar
+                    indisponível com justificativa envia a empresa para o fim da fila do segmento (sem lançar
+                    horas). Registros em Impedimentos seguem para auditoria.
                 </p>
             </Secao>
         </div>
@@ -172,7 +147,6 @@ function GuiaImpedimento() {
 
 const CONTEUDO = {
     horas: GuiaHoras,
-    rotacao: GuiaRotacao,
     impedimento: GuiaImpedimento,
 };
 

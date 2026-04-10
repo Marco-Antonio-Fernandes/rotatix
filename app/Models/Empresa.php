@@ -13,6 +13,15 @@ class Empresa extends Model
 {
     protected $table = 'empresas';
 
+    protected $attributes = [
+        'horas_semanais_acumuladas' => 0,
+        'deslocamento_fila'         => 0,
+        'status_ciclo_concluido'    => false,
+        'posicao_fila'              => 0,
+        'horas_semana'              => 0,
+        'ciclo_concluido'           => false,
+    ];
+
     protected $fillable = [
         'razao_social',
         'nome_fantasia',
@@ -21,6 +30,8 @@ class Empresa extends Model
         'telefone',
         'responsavel_tecnico',
         'horas_semanais_acumuladas',
+        'deslocamento_fila',
+        'semana_referencia',
         'status_ciclo_concluido',
         'segmento_id',
         'posicao_fila',
@@ -30,6 +41,7 @@ class Empresa extends Model
 
     protected $casts = [
         'horas_semanais_acumuladas' => 'float',
+        'deslocamento_fila'         => 'float',
         'status_ciclo_concluido'    => 'boolean',
         'segmento_id'               => 'integer',
         'posicao_fila'              => 'integer',

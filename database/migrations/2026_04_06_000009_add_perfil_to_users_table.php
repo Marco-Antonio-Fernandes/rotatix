@@ -8,6 +8,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('users', 'perfil')) return;
+
         Schema::table('users', function (Blueprint $table) {
             $table->enum('perfil', ['admin', 'operador'])->default('operador')->after('password');
         });

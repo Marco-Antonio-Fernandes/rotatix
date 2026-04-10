@@ -84,7 +84,7 @@ export default function ImpedimentosIndex() {
                                                 </span>
                                                 <span className="text-xs text-zinc-500">{imp.data}</span>
                                             </div>
-                                            <p className="mt-2 text-sm text-zinc-200">{imp.descricao}</p>
+                                            <p className="mt-2 text-sm text-zinc-200">{imp.justificativa}</p>
                                             {imp.empresa && (
                                                 <Link
                                                     to={`/empresas/${imp.empresa.id}`}

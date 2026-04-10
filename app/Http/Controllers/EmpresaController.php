@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreEmpresaRequest;
+use App\Models\Empresa;
 use App\Services\EmpresaService;
+use App\Services\RotacaoService;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -15,7 +17,8 @@ use Illuminate\Http\JsonResponse;
 class EmpresaController extends Controller
 {
     public function __construct(
-        private readonly EmpresaService $empresaService
+        private readonly EmpresaService $empresaService,
+        private readonly RotacaoService $rotacaoService
     ) {}
 
     /**
@@ -24,7 +27,17 @@ class EmpresaController extends Controller
      */
     public function index(): JsonResponse
     {
+        $this->rotacaoService->garantirTodasPosicoesFila();
+
         return response()->json($this->empresaService->listarTodas());
+    }
+
+    public function show(Empresa $empresa): JsonResponse
+    {
+        $this->rotacaoService->garantirPosicoesFilaNoSegmento($empresa->segmento_id);
+        $empresa->refresh();
+
+        return response()->json($empresa->load('segmento'));
     }
 
     /**
@@ -36,5 +49,12 @@ class EmpresaController extends Controller
         $empresa = $this->empresaService->salvar($request->validated());
 
         return response()->json($empresa, 201);
+    }
+
+    public function destroy(Empresa $empresa): JsonResponse
+    {
+        $this->empresaService->remover($empresa);
+
+        return response()->json(null, 204);
     }
 }

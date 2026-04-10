@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { exportarCsv } from '@/utils/exportarCsv';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -7,15 +8,68 @@ const LIMITE_HORAS = 40;
 const ABAS = [
     { id: 'prestadores', label: 'Prestadores por Categoria' },
     { id: 'servicos', label: 'Catálogo de Serviços' },
-    { id: 'rotacao', label: 'Status do Rodízio' },
     { id: 'impedimentos', label: 'Impedimentos' },
     { id: 'mensal', label: 'Consolidado Mensal' },
 ];
+
+function PainelResetSemana() {
+    const [loading, setLoading] = useState(false);
+    const [msg, setMsg] = useState('');
+    const [err, setErr] = useState('');
+
+    async function executar() {
+        if (
+            !window.confirm(
+                'Zerar horas semanais (contador 40h) e deslocamentos em todas as empresas? A posição na fila não muda. Exporte os relatórios antes, se precisar do período.',
+            )
+        ) {
+            return;
+        }
+        setLoading(true);
+        setMsg('');
+        setErr('');
+        try {
+            await axios.post('/api/relatorios/resetar-semana');
+            setMsg('Contadores da semana zerados.');
+        } catch (e) {
+            setErr(
+                typeof e.response?.data?.message === 'string'
+                    ? e.response.data.message
+                    : 'Não foi possível resetar.',
+            );
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="mb-6 rounded-xl border border-amber-500/25 bg-amber-500/5 px-5 py-4">
+            <p className="text-sm text-zinc-300">
+                Depois de gerar e guardar o relatório da semana, use o reset para começar um novo período: zera o
+                contador semanal de horas de <span className="font-medium text-zinc-100">todas</span> as empresas. A
+                ordem da fila (posição) não muda.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                    type="button"
+                    disabled={loading}
+                    onClick={executar}
+                    className="rounded-md border border-amber-600/50 bg-amber-600/20 px-4 py-2 text-sm font-medium text-amber-200 hover:bg-amber-600/30 disabled:opacity-50"
+                >
+                    {loading ? '…' : 'Resetar contadores da semana'}
+                </button>
+                {msg && <span className="text-sm text-emerald-400">{msg}</span>}
+                {err && <span className="text-sm text-red-400">{err}</span>}
+            </div>
+        </div>
+    );
+}
 
 // ── Prestadores por Categoria ─────────────────────────────────────────────────
 function RelatorioPrestadores() {
     const [segmentos, setSegmentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
+    const [segmentoFiltro, setSegmentoFiltro] = useState('');
 
     useEffect(() => {
         axios.get('/api/segmentos').then(({ data }) => {
@@ -24,14 +78,56 @@ function RelatorioPrestadores() {
         });
     }, []);
 
+    const listaSegmentos =
+        segmentoFiltro === '' ? segmentos : segmentos.filter((s) => String(s.id) === segmentoFiltro);
+
+    function exportarExcel() {
+        const linhas = [];
+        listaSegmentos.forEach((seg) => {
+            (seg.empresas ?? []).forEach((emp) => {
+                linhas.push([
+                    seg.nome,
+                    emp.nome_fantasia || emp.razao_social,
+                    emp.razao_social ?? '',
+                    Number(emp.horas_semanais_acumuladas ?? 0).toFixed(1),
+                ]);
+            });
+        });
+        exportarCsv('relatorio_prestadores', ['Segmento', 'Nome', 'Razão social', 'Horas acumuladas'], linhas);
+    }
+
     if (carregando) return <Carregando />;
 
     return (
         <div className="space-y-4">
+            <div className="flex flex-wrap items-end gap-3">
+                <div>
+                    <label className="mb-1 block text-xs text-zinc-500">Segmento</label>
+                    <select
+                        value={segmentoFiltro}
+                        onChange={(e) => setSegmentoFiltro(e.target.value)}
+                        className="rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100"
+                    >
+                        <option value="">Todos</option>
+                        {segmentos.map((s) => (
+                            <option key={s.id} value={String(s.id)}>
+                                {s.nome}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <button
+                    type="button"
+                    onClick={exportarExcel}
+                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                    Exportar Excel (CSV)
+                </button>
+            </div>
             {segmentos.length === 0 ? (
                 <Vazio texto="Nenhum segmento cadastrado." />
             ) : (
-                segmentos.map((seg) => (
+                listaSegmentos.map((seg) => (
                     <div key={seg.id} className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5">
                         <div className="mb-3 flex items-center justify-between">
                             <h4 className="font-semibold text-zinc-100">{seg.nome}</h4>
@@ -91,9 +187,29 @@ function RelatorioServicos() {
         });
     }, []);
 
+    function exportarExcel() {
+        const linhas = servicos.map((s) => [
+            s.nome,
+            s.descricao ?? '',
+            s.segmento?.nome ?? '',
+            String(s.empresas_count ?? 0),
+        ]);
+        exportarCsv('relatorio_servicos', ['Serviço', 'Descrição', 'Segmento', 'Empresas vinculadas'], linhas);
+    }
+
     if (carregando) return <Carregando />;
 
     return (
+        <div className="space-y-3">
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={exportarExcel}
+                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                    Exportar Excel (CSV)
+                </button>
+            </div>
         <div className="overflow-hidden rounded-xl border border-zinc-800">
             <table className="min-w-full border-collapse">
                 <thead className="bg-zinc-800/80">
@@ -124,60 +240,6 @@ function RelatorioServicos() {
                 </tbody>
             </table>
         </div>
-    );
-}
-
-// ── Status do Rodízio Atual ───────────────────────────────────────────────────
-function RelatorioRotacao() {
-    const [segmentos, setSegmentos] = useState([]);
-    const [carregando, setCarregando] = useState(true);
-
-    useEffect(() => {
-        axios.get('/api/segmentos').then(({ data }) => {
-            setSegmentos(data);
-            setCarregando(false);
-        });
-    }, []);
-
-    if (carregando) return <Carregando />;
-
-    return (
-        <div className="space-y-6">
-            {segmentos.length === 0 ? (
-                <Vazio texto="Nenhum segmento cadastrado." />
-            ) : (
-                segmentos.map((seg) => {
-                    const ativas = (seg.empresas ?? []).filter((e) => (e.horas_semanais_acumuladas ?? 0) < LIMITE_HORAS);
-                    const concluidas = (seg.empresas ?? []).filter((e) => (e.horas_semanais_acumuladas ?? 0) >= LIMITE_HORAS);
-                    const proxima = ativas[0];
-
-                    return (
-                        <div key={seg.id} className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-5">
-                            <div className="mb-4 flex items-center justify-between">
-                                <h4 className="font-semibold text-zinc-100">{seg.nome}</h4>
-                                <div className="flex gap-3 text-xs">
-                                    <span className="text-emerald-400">{ativas.length} ativas</span>
-                                    <span className="text-red-400">{concluidas.length} concluídas</span>
-                                </div>
-                            </div>
-                            {proxima && (
-                                <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-500">Próxima no rodízio</p>
-                                    <p className="mt-0.5 font-medium text-zinc-100">
-                                        {proxima.nome_fantasia || proxima.razao_social}
-                                    </p>
-                                    <p className="text-xs text-zinc-500">
-                                        {Number(proxima.horas_semanais_acumuladas ?? 0).toFixed(1)}h usadas de {LIMITE_HORAS}h
-                                    </p>
-                                </div>
-                            )}
-                            {!seg.empresas?.length && (
-                                <p className="text-sm text-zinc-600">Nenhuma empresa neste segmento.</p>
-                            )}
-                        </div>
-                    );
-                })
-            )}
         </div>
     );
 }
@@ -199,8 +261,27 @@ function RelatorioImpedimentos() {
     const pendentes = impedimentos.filter((i) => !i.resolvido);
     const resolvidos = impedimentos.filter((i) => i.resolvido);
 
+    function exportarExcel() {
+        const linhas = impedimentos.map((imp) => [
+            imp.data,
+            imp.empresa?.nome_fantasia || imp.empresa?.razao_social || '',
+            imp.justificativa ?? '',
+            imp.resolvido ? 'Resolvido' : 'Pendente',
+        ]);
+        exportarCsv('relatorio_impedimentos', ['Data', 'Empresa', 'Justificativa', 'Status'], linhas);
+    }
+
     return (
         <div className="space-y-6">
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={exportarExcel}
+                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                    Exportar Excel (CSV)
+                </button>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
                 <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
                     <p className="text-xs font-semibold uppercase tracking-wider text-red-400">Pendentes</p>
@@ -232,7 +313,7 @@ function RelatorioImpedimentos() {
                                     <td className="px-6 py-4 text-sm text-zinc-300">
                                         {imp.empresa?.nome_fantasia || imp.empresa?.razao_social || '—'}
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-zinc-400">{imp.descricao}</td>
+                                    <td className="px-6 py-4 text-sm text-zinc-400">{imp.justificativa ?? '—'}</td>
                                     <td className="px-6 py-4">
                                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                                             imp.resolvido
@@ -273,6 +354,20 @@ function RelatorioMensal() {
 
     const totalHoras = dados.reduce((acc, l) => acc + Number(l.horas ?? 0), 0);
 
+    function exportarExcel() {
+        const linhasDet = dados.map((l) => [
+            l.data,
+            l.empresa?.nome_fantasia || l.empresa?.razao_social || '',
+            typeof l.servico === 'string' ? l.servico : l.servico?.nome ?? '',
+            String(l.horas ?? ''),
+        ]);
+        exportarCsv(
+            `relatorio_horas_${ano}_${mes}`,
+            ['Data', 'Empresa', 'Serviço', 'Horas'],
+            linhasDet,
+        );
+    }
+
     const porEmpresa = dados.reduce((acc, l) => {
         const nome = l.empresa?.nome_fantasia || l.empresa?.razao_social || `#${l.empresa_id}`;
         acc[nome] = (acc[nome] ?? 0) + Number(l.horas ?? 0);
@@ -284,7 +379,7 @@ function RelatorioMensal() {
     return (
         <div className="space-y-6">
             {/* Filtro */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
                 <select
                     value={mes}
                     onChange={(e) => setMes(e.target.value)}
@@ -305,6 +400,14 @@ function RelatorioMensal() {
                         <option key={a} value={a}>{a}</option>
                     ))}
                 </select>
+                <button
+                    type="button"
+                    onClick={exportarExcel}
+                    disabled={carregando || dados.length === 0}
+                    className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                    Exportar Excel (CSV)
+                </button>
             </div>
 
             {carregando ? (
@@ -380,7 +483,9 @@ function RelatorioMensal() {
                                             <td className="px-6 py-3 text-zinc-300">
                                                 {l.empresa?.nome_fantasia || l.empresa?.razao_social || '—'}
                                             </td>
-                                            <td className="px-6 py-3 text-zinc-400">{l.servico?.nome ?? '—'}</td>
+                                            <td className="px-6 py-3 text-zinc-400">
+                                                {typeof l.servico === 'string' ? l.servico : l.servico?.nome ?? '—'}
+                                            </td>
                                             <td className="px-6 py-3 text-right font-medium text-zinc-100">{l.horas}h</td>
                                         </tr>
                                     ))}
@@ -417,7 +522,6 @@ function Vazio({ texto }) {
 const COMPONENTES = {
     prestadores: RelatorioPrestadores,
     servicos: RelatorioServicos,
-    rotacao: RelatorioRotacao,
     impedimentos: RelatorioImpedimentos,
     mensal: RelatorioMensal,
 };
@@ -440,7 +544,8 @@ export default function RelatoriosIndex() {
             <div className="py-10">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-                    {/* Tabs */}
+                    <PainelResetSemana />
+
                     <div className="mb-6 flex flex-wrap gap-1 border-b border-zinc-800">
                         {ABAS.map((a) => (
                             <button

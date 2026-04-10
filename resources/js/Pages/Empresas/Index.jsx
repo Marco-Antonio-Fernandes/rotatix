@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { formatarCnpjDigitando, formatarTelefoneBrDigitando } from '@/utils/mascaras';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -36,6 +37,7 @@ export default function Index() {
     const [nomeSegmento, setNomeSegmento] = useState('');
     const [erros, setErros] = useState({});
     const [salvando, setSalvando] = useState(false);
+    const [removendoId, setRemovendoId] = useState(null);
 
     useEffect(() => {
         document.title = `Empresas — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
@@ -111,6 +113,17 @@ export default function Index() {
     function nomeSegmentoDaEmpresa(empresa) {
         const seg = segmentos.find((s) => s.id === empresa.segmento_id);
         return seg?.nome ?? '—';
+    }
+
+    async function removerEmpresa(empresa) {
+        if (!window.confirm(`Remover "${empresa.razao_social}"? Esta ação não pode ser desfeita.`)) return;
+        setRemovendoId(empresa.id);
+        try {
+            await axios.delete(`/api/empresas/${empresa.id}`);
+            setEmpresas((prev) => prev.filter((e) => e.id !== empresa.id));
+        } finally {
+            setRemovendoId(null);
+        }
     }
 
     return (
@@ -202,7 +215,7 @@ export default function Index() {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-right text-sm">
-                                                        <div className="flex items-center justify-end gap-3">
+                                                        <div className="flex flex-wrap items-center justify-end gap-3">
                                                             <Link
                                                                 to={`/empresas/${empresa.id}/vinculos`}
                                                                 className="text-zinc-500 hover:text-zinc-300"
@@ -215,6 +228,14 @@ export default function Index() {
                                                             >
                                                                 Detalhes
                                                             </Link>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removerEmpresa(empresa)}
+                                                                disabled={removendoId === empresa.id}
+                                                                className="text-red-400/90 hover:text-red-300 disabled:opacity-50"
+                                                            >
+                                                                {removendoId === empresa.id ? '…' : 'Remover'}
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -257,10 +278,16 @@ export default function Index() {
                                 <input
                                     value={formEmpresa.cnpj}
                                     onChange={(e) =>
-                                        setFormEmpresa((p) => ({ ...p, cnpj: e.target.value }))
+                                        setFormEmpresa((p) => ({
+                                            ...p,
+                                            cnpj: formatarCnpjDigitando(e.target.value),
+                                        }))
                                     }
                                     className={inputCls}
                                     placeholder="00.000.000/0000-00"
+                                    inputMode="numeric"
+                                    autoComplete="off"
+                                    maxLength={18}
                                     required
                                 />
                             </Campo>
@@ -279,9 +306,16 @@ export default function Index() {
                                     <input
                                         value={formEmpresa.telefone}
                                         onChange={(e) =>
-                                            setFormEmpresa((p) => ({ ...p, telefone: e.target.value }))
+                                            setFormEmpresa((p) => ({
+                                                ...p,
+                                                telefone: formatarTelefoneBrDigitando(e.target.value),
+                                            }))
                                         }
                                         className={inputCls}
+                                        placeholder="(00) 00000-0000"
+                                        inputMode="tel"
+                                        autoComplete="tel"
+                                        maxLength={15}
                                     />
                                 </Campo>
                             </div>

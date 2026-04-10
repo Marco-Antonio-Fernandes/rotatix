@@ -11,14 +11,11 @@ import EmpresasIndex from './Pages/Empresas/Index';
 import EmpresasCreate from './Pages/Empresas/Create';
 import EmpresasShow from './Pages/Empresas/Show';
 import EmpresasVinculos from './Pages/Empresas/Vinculos';
-import ServicosIndex from './Pages/Servicos/Index';
-import ServicosCreate from './Pages/Servicos/Create';
 import LancamentoHorasCreate from './Pages/LancamentoHoras/Create';
 import ImpedimentosIndex from './Pages/Impedimentos/Index';
 import ImpedimentosCreate from './Pages/Impedimentos/Create';
 import UsuariosIndex from './Pages/Usuarios/Index';
 import UsuariosCreate from './Pages/Usuarios/Create';
-import RotacaoIndex from './Pages/Rotacao/Index';
 import RelatoriosIndex from './Pages/Relatorios/Index';
 import AjudaIndex from './Pages/Ajuda/Index';
 import ProfileEdit from './Pages/Profile/Edit';
@@ -77,14 +74,11 @@ function AppRoutes() {
             <Route path="/empresas/criar" element={<P><EmpresasCreate /></P>} />
             <Route path="/empresas/:id" element={<P><EmpresasShow /></P>} />
             <Route path="/empresas/:id/vinculos" element={<P><EmpresasVinculos /></P>} />
-            <Route path="/servicos" element={<P><ServicosIndex /></P>} />
-            <Route path="/servicos/criar" element={<P><ServicosCreate /></P>} />
             <Route path="/lancamento-horas/criar" element={<P><LancamentoHorasCreate /></P>} />
             <Route path="/impedimentos" element={<P><ImpedimentosIndex /></P>} />
             <Route path="/impedimentos/criar" element={<P><ImpedimentosCreate /></P>} />
             <Route path="/usuarios" element={<P><UsuariosIndex /></P>} />
             <Route path="/usuarios/criar" element={<P><UsuariosCreate /></P>} />
-            <Route path="/rotacao" element={<P><RotacaoIndex /></P>} />
             <Route path="/relatorios" element={<P><RelatoriosIndex /></P>} />
             <Route path="/ajuda" element={<P><AjudaIndex /></P>} />
             <Route path="/profile" element={<P><ProfileEdit /></P>} />

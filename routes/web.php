@@ -18,7 +18,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/impedimentos/criar', 'app')->name('impedimentos.create');
     Route::view('/usuarios', 'app')->name('usuarios.index');
     Route::view('/usuarios/criar', 'app')->name('usuarios.create');
-    Route::view('/rotacao', 'app')->name('rotacao.index');
     Route::view('/relatorios', 'app')->name('relatorios.index');
     Route::view('/ajuda', 'app')->name('ajuda.index');
 });

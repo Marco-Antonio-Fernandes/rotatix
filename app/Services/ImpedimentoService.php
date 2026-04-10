@@ -23,6 +23,7 @@ class ImpedimentoService
             'usuario_id'    => Auth::id(),
             'data'          => $dados['data'],
             'justificativa' => $dados['justificativa'],
+            'resolvido'     => false,
         ]);
 
         AuditLog::create([

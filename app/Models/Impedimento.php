@@ -16,10 +16,12 @@ class Impedimento extends Model
         'usuario_id',
         'data',
         'justificativa',
+        'resolvido',
     ];
 
     protected $casts = [
-        'data' => 'date',
+        'data'     => 'date',
+        'resolvido' => 'boolean',
     ];
 
     public function empresa(): BelongsTo

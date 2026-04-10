@@ -16,6 +16,7 @@ class LancamentoHora extends Model
         'usuario_id',
         'data',
         'horas',
+        'servico',
     ];
 
     protected $casts = [

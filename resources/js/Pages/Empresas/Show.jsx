@@ -182,7 +182,7 @@ export default function EmpresasShow() {
                                             }`}
                                         >
                                             <div className="flex items-start justify-between">
-                                                <p className="text-sm text-zinc-200">{imp.descricao}</p>
+                                                <p className="text-sm text-zinc-200">{imp.justificativa}</p>
                                                 <span
                                                     className={`ml-4 shrink-0 rounded-full px-2 py-0.5 text-xs ${
                                                         imp.resolvido

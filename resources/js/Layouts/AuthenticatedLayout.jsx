@@ -33,9 +33,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink to="/" end>Início</NavLink>
-                                <NavLink to="/rotacao">Rotação</NavLink>
                                 <NavLink to="/empresas">Empresas</NavLink>
-                                <NavLink to="/servicos">Serviços</NavLink>
                                 <NavLink to="/impedimentos">Impedimentos</NavLink>
                                 <NavLink to="/usuarios">Usuários</NavLink>
                                 <NavLink to="/relatorios">Relatórios</NavLink>
@@ -137,9 +135,7 @@ export default function AuthenticatedLayout({ header, children }) {
                 >
                     <div className="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink to="/" end>Início</ResponsiveNavLink>
-                        <ResponsiveNavLink to="/rotacao">Rotação</ResponsiveNavLink>
                         <ResponsiveNavLink to="/empresas">Empresas</ResponsiveNavLink>
-                        <ResponsiveNavLink to="/servicos">Serviços</ResponsiveNavLink>
                         <ResponsiveNavLink to="/impedimentos">Impedimentos</ResponsiveNavLink>
                         <ResponsiveNavLink to="/usuarios">Usuários</ResponsiveNavLink>
                         <ResponsiveNavLink to="/relatorios">Relatórios</ResponsiveNavLink>
