@@ -258,17 +258,13 @@ function RelatorioImpedimentos() {
 
     if (carregando) return <Carregando />;
 
-    const pendentes = impedimentos.filter((i) => !i.resolvido);
-    const resolvidos = impedimentos.filter((i) => i.resolvido);
-
     function exportarExcel() {
         const linhas = impedimentos.map((imp) => [
             imp.data,
             imp.empresa?.nome_fantasia || imp.empresa?.razao_social || '',
             imp.justificativa ?? '',
-            imp.resolvido ? 'Resolvido' : 'Pendente',
         ]);
-        exportarCsv('relatorio_impedimentos', ['Data', 'Empresa', 'Justificativa', 'Status'], linhas);
+        exportarCsv('relatorio_impedimentos', ['Data', 'Empresa', 'Justificativa'], linhas);
     }
 
     return (
@@ -282,16 +278,6 @@ function RelatorioImpedimentos() {
                     Exportar Excel (CSV)
                 </button>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-red-400">Pendentes</p>
-                    <p className="mt-1 text-3xl font-bold text-red-400">{pendentes.length}</p>
-                </div>
-                <div className="rounded-xl border border-zinc-800 bg-zinc-950/40 p-4 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Resolvidos</p>
-                    <p className="mt-1 text-3xl font-bold text-zinc-300">{resolvidos.length}</p>
-                </div>
-            </div>
 
             {impedimentos.length === 0 ? (
                 <Vazio texto="Nenhum impedimento registrado." />
@@ -303,7 +289,6 @@ function RelatorioImpedimentos() {
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Data</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Empresa</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Descrição</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800 bg-zinc-900">
@@ -314,15 +299,6 @@ function RelatorioImpedimentos() {
                                         {imp.empresa?.nome_fantasia || imp.empresa?.razao_social || '—'}
                                     </td>
                                     <td className="px-6 py-4 text-sm text-zinc-400">{imp.justificativa ?? '—'}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                            imp.resolvido
-                                                ? 'bg-zinc-700 text-zinc-400'
-                                                : 'bg-red-500/10 text-red-400'
-                                        }`}>
-                                            {imp.resolvido ? 'Resolvido' : 'Pendente'}
-                                        </span>
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>

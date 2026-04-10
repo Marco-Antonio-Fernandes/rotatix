@@ -37,7 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('lancamento-horas', [LancamentoHoraController::class, 'store']);
 
         Route::post('impedimentos', [ImpedimentoController::class, 'store']);
-        Route::patch('impedimentos/{impedimento}', [ImpedimentoController::class, 'update']);
 
         Route::post('relatorios/resetar-semana', [RelatorioController::class, 'resetarSemana']);
     });

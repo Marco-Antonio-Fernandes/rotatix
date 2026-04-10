@@ -121,17 +121,14 @@ function GuiaImpedimento() {
                 <Passo numero="1" texto='Acesse "Impedimentos" no menu ou abra os detalhes da empresa e clique em "Registrar".' />
                 <Passo numero="2" texto="Selecione a empresa afetada e informe a data do impedimento." />
                 <Passo numero="3" texto="Descreva a justificativa com clareza (será registrada em log de auditoria)." />
-                <Passo numero="4" texto='Clique em "Registrar". O impedimento fica com status "Pendente".' />
+                <Passo numero="4" texto='Clique em "Registrar". O registro entra no histórico para consulta e auditoria.' />
             </Secao>
 
-            <Secao titulo="Resolvendo um impedimento">
+            <Secao titulo="Consulta">
                 <p>
-                    Quando a situação for resolvida, acesse{' '}
-                    <span className="font-medium text-zinc-100">Impedimentos</span> e clique em{' '}
-                    <span className="font-medium text-zinc-100">Resolver</span> no registro correspondente.
-                    Isso altera o status para "Resolvido" e registra a ação no log de auditoria.
+                    A lista de impedimentos é só para visualização. Situações temporárias (ex.: já em outro
+                    serviço) não precisam ser “encerradas” no sistema.
                 </p>
-                <Alerta texto="Impedimentos resolvidos não são excluídos — permanecem no histórico para fins de auditoria." />
             </Secao>
 
             <Secao titulo="Efeito no rodízio">

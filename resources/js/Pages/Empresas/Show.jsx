@@ -175,24 +175,9 @@ export default function EmpresasShow() {
                                     {impedimentos.map((imp) => (
                                         <div
                                             key={imp.id}
-                                            className={`rounded-lg border p-4 ${
-                                                imp.resolvido
-                                                    ? 'border-zinc-800 bg-zinc-950/40 opacity-60'
-                                                    : 'border-red-500/20 bg-red-500/5'
-                                            }`}
+                                            className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-4"
                                         >
-                                            <div className="flex items-start justify-between">
-                                                <p className="text-sm text-zinc-200">{imp.justificativa}</p>
-                                                <span
-                                                    className={`ml-4 shrink-0 rounded-full px-2 py-0.5 text-xs ${
-                                                        imp.resolvido
-                                                            ? 'bg-zinc-700 text-zinc-400'
-                                                            : 'bg-red-500/10 text-red-400'
-                                                    }`}
-                                                >
-                                                    {imp.resolvido ? 'Resolvido' : 'Pendente'}
-                                                </span>
-                                            </div>
+                                            <p className="text-sm text-zinc-200">{imp.justificativa}</p>
                                             <p className="mt-1 text-xs text-zinc-600">{imp.data}</p>
                                         </div>
                                     ))}

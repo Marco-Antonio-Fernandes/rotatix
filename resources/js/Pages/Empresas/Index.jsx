@@ -38,6 +38,7 @@ export default function Index() {
     const [erros, setErros] = useState({});
     const [salvando, setSalvando] = useState(false);
     const [removendoId, setRemovendoId] = useState(null);
+    const [removendoSegmentoId, setRemovendoSegmentoId] = useState(null);
 
     useEffect(() => {
         document.title = `Empresas — ${import.meta.env.VITE_APP_NAME ?? 'Laravel'}`;
@@ -126,6 +127,25 @@ export default function Index() {
         }
     }
 
+    async function removerSegmento(seg) {
+        const n = (seg.empresas ?? []).length;
+        const msg =
+            n > 0
+                ? `Remover segmento "${seg.nome}"? As ${n} empresa(s) ficam sem segmento.`
+                : `Remover segmento "${seg.nome}"?`;
+        if (!window.confirm(msg)) return;
+        setRemovendoSegmentoId(seg.id);
+        try {
+            await axios.delete(`/api/segmentos/${seg.id}`);
+            setSegmentos((prev) => prev.filter((s) => s.id !== seg.id));
+            setEmpresas((prev) =>
+                prev.map((e) => (e.segmento_id === seg.id ? { ...e, segmento_id: null } : e)),
+            );
+        } finally {
+            setRemovendoSegmentoId(null);
+        }
+    }
+
     return (
         <AuthenticatedLayout
             header={
@@ -157,6 +177,32 @@ export default function Index() {
                                     </button>
                                 </div>
                             </div>
+
+                            {!carregando && segmentos.length > 0 && (
+                                <div className="mb-6 rounded-lg border border-zinc-800 bg-zinc-950/40 p-4">
+                                    <p className="mb-2 text-xs font-medium uppercase text-zinc-500">
+                                        Segmentos
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {segmentos.map((s) => (
+                                            <div
+                                                key={s.id}
+                                                className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-800/80 px-3 py-1.5"
+                                            >
+                                                <span className="text-sm text-zinc-200">{s.nome}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removerSegmento(s)}
+                                                    disabled={removendoSegmentoId === s.id}
+                                                    className="rounded border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+                                                >
+                                                    {removendoSegmentoId === s.id ? '…' : 'Apagar'}
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {carregando ? (
                                 <p className="py-8 text-center text-zinc-500">Carregando…</p>
