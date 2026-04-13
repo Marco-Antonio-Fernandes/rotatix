@@ -1,10 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ConfirmPassword from './Pages/Auth/ConfirmPassword';
-import ForgotPassword from './Pages/Auth/ForgotPassword';
 import Login from './Pages/Auth/Login';
 import Register from './Pages/Auth/Register';
-import ResetPassword from './Pages/Auth/ResetPassword';
 import VerifyEmail from './Pages/Auth/VerifyEmail';
 import Dashboard from './Pages/Dashboard';
 import EmpresasIndex from './Pages/Empresas/Index';
@@ -65,8 +63,6 @@ function AppRoutes() {
         <Routes>
             <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
             <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
-            <Route path="/forgot-password" element={<GuestRoute><ForgotPassword /></GuestRoute>} />
-            <Route path="/reset-password/:token" element={<GuestRoute><ResetPassword /></GuestRoute>} />
             <Route path="/verify-email" element={<P><VerifyEmail /></P>} />
             <Route path="/confirm-password" element={<P><ConfirmPassword /></P>} />
             <Route path="/" element={<P><Dashboard /></P>} />

@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import GuestLayout from '@/Layouts/GuestLayout';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export default function Login() {
     const navigate = useNavigate();
@@ -104,14 +104,7 @@ export default function Login() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-end">
-                    <Link
-                        to="/forgot-password"
-                        className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Forgot your password?
-                    </Link>
-
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <PrimaryButton disabled={processing}>
                         Log in
                     </PrimaryButton>
                 </div>
