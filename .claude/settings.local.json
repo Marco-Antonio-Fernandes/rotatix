@@ -4,7 +4,11 @@
       "Bash(php --version)",
       "Bash(composer --version)",
       "Bash(curl -s --max-time 5 https://api.aiven.io)",
-      "Bash(php artisan:*)"
+      "Bash(php artisan:*)",
+      "Bash(xargs grep *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill *)",
+      "Bash(kill *)"
     ]
   },
   "outputStyle": "default"
