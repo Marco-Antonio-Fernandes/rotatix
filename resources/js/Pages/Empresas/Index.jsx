@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { formatarCnpjDigitando, formatarTelefoneBrDigitando } from '@/utils/mascaras';
 import axios from 'axios';
@@ -28,6 +29,7 @@ const formEmpresaInicial = {
 };
 
 export default function Index() {
+    const { visitorMode } = useAuth();
     const [empresas, setEmpresas] = useState([]);
     const [segmentos, setSegmentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
@@ -160,22 +162,24 @@ export default function Index() {
                         <div className="p-6 text-zinc-100">
                             <div className="mb-6 flex items-center justify-between">
                                 <h3 className="text-lg font-medium">Empresas Cadastradas</h3>
-                                <div className="flex gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={abrirModalSegmento}
-                                        className="rounded-md border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-700"
-                                    >
-                                        Novo Segmento
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={abrirModalEmpresa}
-                                        className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white transition hover:bg-emerald-700"
-                                    >
-                                        Nova Empresa
-                                    </button>
-                                </div>
+                                {!visitorMode && (
+                                    <div className="flex gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={abrirModalSegmento}
+                                            className="rounded-md border border-zinc-700 bg-zinc-800 px-4 py-2 text-sm text-zinc-200 transition hover:bg-zinc-700"
+                                        >
+                                            Novo Segmento
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={abrirModalEmpresa}
+                                            className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white transition hover:bg-emerald-700"
+                                        >
+                                            Nova Empresa
+                                        </button>
+                                    </div>
+                                )}
                             </div>
 
                             {!carregando && segmentos.length > 0 && (
@@ -190,14 +194,16 @@ export default function Index() {
                                                 className="flex items-center gap-2 rounded-md border border-zinc-700 bg-zinc-800/80 px-3 py-1.5"
                                             >
                                                 <span className="text-sm text-zinc-200">{s.nome}</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removerSegmento(s)}
-                                                    disabled={removendoSegmentoId === s.id}
-                                                    className="rounded border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
-                                                >
-                                                    {removendoSegmentoId === s.id ? '…' : 'Apagar'}
-                                                </button>
+                                                {!visitorMode && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removerSegmento(s)}
+                                                        disabled={removendoSegmentoId === s.id}
+                                                        className="rounded border border-red-500/40 bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+                                                    >
+                                                        {removendoSegmentoId === s.id ? '…' : 'Apagar'}
+                                                    </button>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -262,26 +268,30 @@ export default function Index() {
                                                     </td>
                                                     <td className="px-6 py-4 text-right text-sm">
                                                         <div className="flex flex-wrap items-center justify-end gap-3">
-                                                            <Link
-                                                                to={`/empresas/${empresa.id}/vinculos`}
-                                                                className="text-zinc-500 hover:text-zinc-300"
-                                                            >
-                                                                Vínculos
-                                                            </Link>
+                                                            {!visitorMode && (
+                                                                <Link
+                                                                    to={`/empresas/${empresa.id}/vinculos`}
+                                                                    className="text-zinc-500 hover:text-zinc-300"
+                                                                >
+                                                                    Vínculos
+                                                                </Link>
+                                                            )}
                                                             <Link
                                                                 to={`/empresas/${empresa.id}`}
                                                                 className="text-emerald-400 hover:text-emerald-300"
                                                             >
                                                                 Detalhes
                                                             </Link>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removerEmpresa(empresa)}
-                                                                disabled={removendoId === empresa.id}
-                                                                className="text-red-400/90 hover:text-red-300 disabled:opacity-50"
-                                                            >
-                                                                {removendoId === empresa.id ? '…' : 'Remover'}
-                                                            </button>
+                                                            {!visitorMode && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removerEmpresa(empresa)}
+                                                                    disabled={removendoId === empresa.id}
+                                                                    className="text-red-400/90 hover:text-red-300 disabled:opacity-50"
+                                                                >
+                                                                    {removendoId === empresa.id ? '…' : 'Remover'}
+                                                                </button>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { useAuth } from '@/contexts/AuthContext';
 import { exportarCsv } from '@/utils/exportarCsv';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -13,6 +14,7 @@ const ABAS = [
 ];
 
 function PainelResetSemana() {
+    const { visitorMode } = useAuth();
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState('');
     const [err, setErr] = useState('');
@@ -40,6 +42,10 @@ function PainelResetSemana() {
         } finally {
             setLoading(false);
         }
+    }
+
+    if (visitorMode) {
+        return null;
     }
 
     return (

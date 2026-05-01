@@ -1,9 +1,11 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function ImpedimentosIndex() {
+    const { visitorMode } = useAuth();
     const [impedimentos, setImpedimentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
 
@@ -20,12 +22,14 @@ export default function ImpedimentosIndex() {
             header={
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-zinc-100">Impedimentos</h2>
-                    <Link
-                        to="/impedimentos/criar"
-                        className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
-                    >
-                        Registrar
-                    </Link>
+                    {!visitorMode && (
+                        <Link
+                            to="/impedimentos/criar"
+                            className="rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+                        >
+                            Registrar
+                        </Link>
+                    )}
                 </div>
             }
         >

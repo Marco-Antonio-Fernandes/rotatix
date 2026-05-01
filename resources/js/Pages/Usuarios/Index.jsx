@@ -1,18 +1,28 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function UsuariosIndex() {
+    const { visitorMode } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
+    const [erroAcesso, setErroAcesso] = useState(false);
     const [carregando, setCarregando] = useState(true);
 
     useEffect(() => {
         document.title = `Usuários — ${import.meta.env.VITE_APP_NAME ?? 'Rotatix'}`;
-        axios.get('/api/usuarios').then(({ data }) => {
-            setUsuarios(data);
-            setCarregando(false);
-        });
+        axios
+            .get('/api/usuarios')
+            .then(({ data }) => {
+                setUsuarios(data);
+                setCarregando(false);
+            })
+            .catch(() => {
+                setErroAcesso(true);
+                setUsuarios([]);
+                setCarregando(false);
+            });
     }, []);
 
     async function remover(id) {
@@ -26,17 +36,26 @@ export default function UsuariosIndex() {
             header={
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-zinc-100">Usuários</h2>
-                    <Link
-                        to="/usuarios/criar"
-                        className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700"
-                    >
-                        Novo Usuário
-                    </Link>
+                    {!visitorMode && !erroAcesso && (
+                        <Link
+                            to="/usuarios/criar"
+                            className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700"
+                        >
+                            Novo Usuário
+                        </Link>
+                    )}
                 </div>
             }
         >
             <div className="py-10">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    {(visitorMode || erroAcesso) && (
+                        <p className="mb-4 rounded-lg border border-zinc-700 bg-zinc-900/80 px-4 py-3 text-sm text-zinc-400">
+                            {visitorMode
+                                ? 'Lista de utilizadores disponível apenas com sessão de administrador.'
+                                : 'Não foi possível carregar os utilizadores.'}
+                        </p>
+                    )}
                     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-sm">
                         {carregando ? (
                             <p className="py-16 text-center text-zinc-500">Carregando…</p>
@@ -74,13 +93,15 @@ export default function UsuariosIndex() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right text-sm">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => remover(u.id)}
-                                                        className="text-red-400 hover:text-red-300"
-                                                    >
-                                                        Remover
-                                                    </button>
+                                                    {!visitorMode && !erroAcesso && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => remover(u.id)}
+                                                            className="text-red-400 hover:text-red-300"
+                                                        >
+                                                            Remover
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))

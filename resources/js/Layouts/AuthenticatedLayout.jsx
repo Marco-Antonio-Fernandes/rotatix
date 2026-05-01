@@ -8,12 +8,19 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function AuthenticatedLayout({ header, children }) {
-    const { user, setUser } = useAuth();
+    const { user, visitorMode, leaveVisitorMode, setUser } = useAuth();
     const navigate = useNavigate();
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
+    const isAdmin = user?.perfil === 'admin';
+
     const sair = async () => {
+        if (visitorMode) {
+            leaveVisitorMode();
+            navigate('/login');
+            return;
+        }
         await axios.post(route('logout'));
         setUser(null);
         navigate('/login');
@@ -21,6 +28,11 @@ export default function AuthenticatedLayout({ header, children }) {
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100">
+            {visitorMode && (
+                <div className="border-b border-amber-500/30 bg-amber-500/10 px-4 py-2 text-center text-sm text-amber-100">
+                    Modo visitante — só visualização. Para alterar dados, inicie sessão.
+                </div>
+            )}
             <nav className="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-sm">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
@@ -35,7 +47,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink to="/" end>Início</NavLink>
                                 <NavLink to="/empresas">Empresas</NavLink>
                                 <NavLink to="/impedimentos">Impedimentos</NavLink>
-                                <NavLink to="/usuarios">Usuários</NavLink>
+                                {isAdmin && (
+                                    <NavLink to="/usuarios">Usuários</NavLink>
+                                )}
                                 <NavLink to="/relatorios">Relatórios</NavLink>
                                 <NavLink to="/ajuda">Ajuda</NavLink>
                             </div>
@@ -50,7 +64,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center rounded-md border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm font-medium leading-4 text-zinc-300 transition duration-150 ease-in-out hover:text-emerald-400 focus:outline-none"
                                             >
-                                                {user?.name}
+                                                {visitorMode ? 'Visitante' : user?.name}
 
                                                 <svg
                                                     className="-me-0.5 ms-2 h-4 w-4"
@@ -69,9 +83,11 @@ export default function AuthenticatedLayout({ header, children }) {
                                     </Dropdown.Trigger>
 
                                     <Dropdown.Content contentClasses="py-1 bg-zinc-900 border border-zinc-800">
-                                        <Dropdown.Link to="/profile">
-                                            Perfil
-                                        </Dropdown.Link>
+                                        {!visitorMode && (
+                                            <Dropdown.Link to="/profile">
+                                                Perfil
+                                            </Dropdown.Link>
+                                        )}
                                         <button
                                             type="button"
                                             onClick={sair}
@@ -137,7 +153,11 @@ export default function AuthenticatedLayout({ header, children }) {
                         <ResponsiveNavLink to="/" end>Início</ResponsiveNavLink>
                         <ResponsiveNavLink to="/empresas">Empresas</ResponsiveNavLink>
                         <ResponsiveNavLink to="/impedimentos">Impedimentos</ResponsiveNavLink>
-                        <ResponsiveNavLink to="/usuarios">Usuários</ResponsiveNavLink>
+                        {isAdmin && (
+                            <ResponsiveNavLink to="/usuarios">
+                                Usuários
+                            </ResponsiveNavLink>
+                        )}
                         <ResponsiveNavLink to="/relatorios">Relatórios</ResponsiveNavLink>
                         <ResponsiveNavLink to="/ajuda">Ajuda</ResponsiveNavLink>
                     </div>
@@ -145,17 +165,21 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="border-t border-zinc-800 pb-1 pt-4">
                         <div className="px-4">
                             <div className="text-base font-medium text-zinc-200">
-                                {user?.name}
+                                {visitorMode ? 'Visitante' : user?.name}
                             </div>
-                            <div className="text-sm font-medium text-zinc-500">
-                                {user?.email}
-                            </div>
+                            {!visitorMode && (
+                                <div className="text-sm font-medium text-zinc-500">
+                                    {user?.email}
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink to="/profile">
-                                Perfil
-                            </ResponsiveNavLink>
+                            {!visitorMode && (
+                                <ResponsiveNavLink to="/profile">
+                                    Perfil
+                                </ResponsiveNavLink>
+                            )}
                             <button
                                 type="button"
                                 onClick={sair}

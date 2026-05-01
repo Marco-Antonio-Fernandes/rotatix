@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { compararFila } from '@/utils/chaveFila';
 import axios from 'axios';
@@ -41,6 +42,7 @@ function BarraHoras({ horas }) {
 }
 
 export default function Dashboard() {
+    const { visitorMode } = useAuth();
     const [segmentos, setSegmentos] = useState([]);
     const [carregando, setCarregando] = useState(true);
     const [indiceProximaSegmento, setIndiceProximaSegmento] = useState(0);
@@ -110,12 +112,14 @@ export default function Dashboard() {
                                 <p className="text-sm text-zinc-400">
                                     Registre horas por segmento, empresa e serviço.
                                 </p>
-                                <Link
-                                    to="/lancamento-horas/criar"
-                                    className="inline-flex shrink-0 items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
-                                >
-                                    Registrar horas
-                                </Link>
+                                {!visitorMode && (
+                                    <Link
+                                        to="/lancamento-horas/criar"
+                                        className="inline-flex shrink-0 items-center justify-center rounded-md bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
+                                    >
+                                        Registrar horas
+                                    </Link>
+                                )}
                             </div>
 
                             {/* ── Stat cards ── */}

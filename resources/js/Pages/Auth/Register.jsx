@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 export default function Register() {
     const navigate = useNavigate();
-    const { setUser } = useAuth();
+    const { setUser, leaveVisitorMode } = useAuth();
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -36,6 +36,7 @@ export default function Register() {
                 password,
                 password_confirmation: passwordConfirmation,
             });
+            leaveVisitorMode();
             setUser(data.user);
             navigate('/');
         } catch (err) {

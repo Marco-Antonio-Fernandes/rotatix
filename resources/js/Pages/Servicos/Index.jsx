@@ -1,9 +1,11 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function ServicosIndex() {
+    const { visitorMode } = useAuth();
     const [servicos, setServicos] = useState([]);
     const [carregando, setCarregando] = useState(true);
 
@@ -26,12 +28,14 @@ export default function ServicosIndex() {
             header={
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold text-zinc-100">Serviços</h2>
-                    <Link
-                        to="/servicos/criar"
-                        className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700"
-                    >
-                        Novo Serviço
-                    </Link>
+                    {!visitorMode && (
+                        <Link
+                            to="/servicos/criar"
+                            className="rounded-md bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-700"
+                        >
+                            Novo Serviço
+                        </Link>
+                    )}
                 </div>
             }
         >
@@ -68,13 +72,15 @@ export default function ServicosIndex() {
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right text-sm">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => remover(s.id)}
-                                                        className="text-red-400 hover:text-red-300"
-                                                    >
-                                                        Remover
-                                                    </button>
+                                                    {!visitorMode && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => remover(s.id)}
+                                                            className="text-red-400 hover:text-red-300"
+                                                        >
+                                                            Remover
+                                                        </button>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))

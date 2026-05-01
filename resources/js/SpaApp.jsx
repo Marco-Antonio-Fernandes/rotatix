@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ConfirmPassword from './Pages/Auth/ConfirmPassword';
 import Login from './Pages/Auth/Login';
@@ -18,8 +18,42 @@ import RelatoriosIndex from './Pages/Relatorios/Index';
 import AjudaIndex from './Pages/Ajuda/Index';
 import ProfileEdit from './Pages/Profile/Edit';
 
+function VisitorWriteGuard({ children }) {
+    const { visitorMode } = useAuth();
+    const loc = useLocation();
+
+    if (!visitorMode) {
+        return children;
+    }
+
+    if (
+        loc.pathname === '/profile' ||
+        loc.pathname === '/verify-email' ||
+        loc.pathname === '/confirm-password'
+    ) {
+        return <Navigate to="/" replace />;
+    }
+
+    const blockedExact = [
+        '/empresas/criar',
+        '/servicos/criar',
+        '/lancamento-horas/criar',
+        '/impedimentos/criar',
+        '/usuarios/criar',
+    ];
+    if (blockedExact.includes(loc.pathname)) {
+        return <Navigate to="/" replace />;
+    }
+
+    if (/\/empresas\/\d+\/vinculos$/.test(loc.pathname)) {
+        return <Navigate to="/empresas" replace />;
+    }
+
+    return children;
+}
+
 function ProtectedRoute({ children }) {
-    const { user, loading } = useAuth();
+    const { user, visitorMode, loading } = useAuth();
 
     if (loading) {
         return (
@@ -29,7 +63,7 @@ function ProtectedRoute({ children }) {
         );
     }
 
-    if (!user) {
+    if (!user && !visitorMode) {
         return <Navigate to="/login" replace />;
     }
 
@@ -55,7 +89,39 @@ function GuestRoute({ children }) {
 }
 
 function P({ children }) {
-    return <ProtectedRoute>{children}</ProtectedRoute>;
+    return (
+        <ProtectedRoute>
+            <VisitorWriteGuard>{children}</VisitorWriteGuard>
+        </ProtectedRoute>
+    );
+}
+
+function AdminRoute({ children }) {
+    const { user, visitorMode, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-zinc-400">
+                Carregando…
+            </div>
+        );
+    }
+
+    if (visitorMode || !user || user.perfil !== 'admin') {
+        return <Navigate to="/" replace />;
+    }
+
+    return children;
+}
+
+function PA({ children }) {
+    return (
+        <ProtectedRoute>
+            <VisitorWriteGuard>
+                <AdminRoute>{children}</AdminRoute>
+            </VisitorWriteGuard>
+        </ProtectedRoute>
+    );
 }
 
 function AppRoutes() {
@@ -73,8 +139,8 @@ function AppRoutes() {
             <Route path="/lancamento-horas/criar" element={<P><LancamentoHorasCreate /></P>} />
             <Route path="/impedimentos" element={<P><ImpedimentosIndex /></P>} />
             <Route path="/impedimentos/criar" element={<P><ImpedimentosCreate /></P>} />
-            <Route path="/usuarios" element={<P><UsuariosIndex /></P>} />
-            <Route path="/usuarios/criar" element={<P><UsuariosCreate /></P>} />
+            <Route path="/usuarios" element={<PA><UsuariosIndex /></PA>} />
+            <Route path="/usuarios/criar" element={<PA><UsuariosCreate /></PA>} />
             <Route path="/relatorios" element={<P><RelatoriosIndex /></P>} />
             <Route path="/ajuda" element={<P><AjudaIndex /></P>} />
             <Route path="/profile" element={<P><ProfileEdit /></P>} />

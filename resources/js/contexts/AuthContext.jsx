@@ -10,9 +10,19 @@ import {
 
 const AuthContext = createContext(null);
 
+const VISITOR_KEY = 'rotatix_visitor';
+
+function readVisitorStorage() {
+    return (
+        typeof sessionStorage !== 'undefined' &&
+        sessionStorage.getItem(VISITOR_KEY) === '1'
+    );
+}
+
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [visitorMode, setVisitorMode] = useState(readVisitorStorage);
+    const [loading, setLoading] = useState(() => !readVisitorStorage());
 
     const refreshUser = useCallback(async () => {
         try {
@@ -23,9 +33,31 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
+    const enterVisitorMode = useCallback(async () => {
+        try {
+            await axios.post(route('logout'));
+        } catch {
+            //
+        }
+        setUser(null);
+        sessionStorage.setItem(VISITOR_KEY, '1');
+        setVisitorMode(true);
+    }, []);
+
+    const leaveVisitorMode = useCallback(() => {
+        sessionStorage.removeItem(VISITOR_KEY);
+        setVisitorMode(false);
+    }, []);
+
     useEffect(() => {
+        if (visitorMode) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
         refreshUser().finally(() => setLoading(false));
-    }, [refreshUser]);
+    }, [visitorMode, refreshUser]);
 
     useEffect(() => {
         const id = axios.interceptors.response.use(
@@ -41,8 +73,16 @@ export function AuthProvider({ children }) {
     }, []);
 
     const value = useMemo(
-        () => ({ user, loading, setUser, refreshUser }),
-        [user, loading, refreshUser],
+        () => ({
+            user,
+            loading,
+            visitorMode,
+            setUser,
+            refreshUser,
+            enterVisitorMode,
+            leaveVisitorMode,
+        }),
+        [user, loading, visitorMode, refreshUser, enterVisitorMode, leaveVisitorMode],
     );
 
     return (

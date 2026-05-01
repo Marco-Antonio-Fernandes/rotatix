@@ -9,6 +9,7 @@ use App\Models\Empresa;
 use App\Services\EmpresaService;
 use App\Services\RotacaoService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Equivalente ao @RestController EmpresaController do Spring Boot.
@@ -27,15 +28,19 @@ class EmpresaController extends Controller
      */
     public function index(): JsonResponse
     {
-        $this->rotacaoService->garantirTodasPosicoesFila();
+        if (Auth::check()) {
+            $this->rotacaoService->garantirTodasPosicoesFila();
+        }
 
         return response()->json($this->empresaService->listarTodas());
     }
 
     public function show(Empresa $empresa): JsonResponse
     {
-        $this->rotacaoService->garantirPosicoesFilaNoSegmento($empresa->segmento_id);
-        $empresa->refresh();
+        if (Auth::check()) {
+            $this->rotacaoService->garantirPosicoesFilaNoSegmento($empresa->segmento_id);
+            $empresa->refresh();
+        }
 
         return response()->json($empresa->load('segmento'));
     }

@@ -22,7 +22,9 @@ class SegmentoController extends Controller
 
     public function index(): JsonResponse
     {
-        $this->rotacaoService->garantirTodasPosicoesFila();
+        if (Auth::check()) {
+            $this->rotacaoService->garantirTodasPosicoesFila();
+        }
 
         $segmentos = Segmento::with(['empresas' => function ($query) {
             $query->orderBy('posicao_fila')->orderBy('id');

@@ -6,10 +6,11 @@ use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    public function test_root_redirects_guests_to_login(): void
+    public function test_root_serves_spa_for_guests(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect(route('login', absolute: false));
+        $response->assertOk();
+        $response->assertViewIs('app');
     }
 }

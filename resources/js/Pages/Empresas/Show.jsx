@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/AuthContext';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -25,6 +26,7 @@ function BarraHoras({ horas }) {
 }
 
 export default function EmpresasShow() {
+    const { visitorMode } = useAuth();
     const { id } = useParams();
     const [empresa, setEmpresa] = useState(null);
     const [lancamentos, setLancamentos] = useState([]);
@@ -114,12 +116,14 @@ export default function EmpresasShow() {
                                 <span className="ml-1 text-sm font-normal text-zinc-500">/ 40h</span>
                             </p>
                             <BarraHoras horas={empresa.horas_semanais_acumuladas ?? 0} />
-                            <Link
-                                to={`/lancamento-horas/criar?empresa_id=${id}`}
-                                className="mt-4 block rounded-md bg-emerald-600 px-4 py-2 text-center text-sm text-white hover:bg-emerald-700"
-                            >
-                                Registrar Horas
-                            </Link>
+                            {!visitorMode && (
+                                <Link
+                                    to={`/lancamento-horas/criar?empresa_id=${id}`}
+                                    className="mt-4 block rounded-md bg-emerald-600 px-4 py-2 text-center text-sm text-white hover:bg-emerald-700"
+                                >
+                                    Registrar Horas
+                                </Link>
+                            )}
                         </div>
                     </div>
 
@@ -160,12 +164,14 @@ export default function EmpresasShow() {
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900 shadow-sm">
                         <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
                             <h3 className="font-medium text-zinc-100">Impedimentos</h3>
-                            <Link
-                                to={`/impedimentos/criar?empresa_id=${id}`}
-                                className="rounded-md bg-red-600/80 px-3 py-1.5 text-xs text-white hover:bg-red-600"
-                            >
-                                Registrar
-                            </Link>
+                            {!visitorMode && (
+                                <Link
+                                    to={`/impedimentos/criar?empresa_id=${id}`}
+                                    className="rounded-md bg-red-600/80 px-3 py-1.5 text-xs text-white hover:bg-red-600"
+                                >
+                                    Registrar
+                                </Link>
+                            )}
                         </div>
                         <div className="p-6">
                             {impedimentos.length === 0 ? (
