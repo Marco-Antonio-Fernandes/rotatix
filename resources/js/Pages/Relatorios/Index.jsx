@@ -196,11 +196,11 @@ function RelatorioServicos() {
     function exportarExcel() {
         const linhas = servicos.map((s) => [
             s.nome,
-            s.descricao ?? '',
+            String(s.horas ?? ''),
             s.segmento?.nome ?? '',
             String(s.empresas_count ?? 0),
         ]);
-        exportarCsv('relatorio_servicos', ['Serviço', 'Descrição', 'Segmento', 'Empresas vinculadas'], linhas);
+        exportarCsv('relatorio_servicos', ['Serviço', 'Horas', 'Segmento', 'Empresas vinculadas'], linhas);
     }
 
     if (carregando) return <Carregando />;
@@ -221,7 +221,7 @@ function RelatorioServicos() {
                 <thead className="bg-zinc-800/80">
                     <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Serviço</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Descrição</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Horas</th>
                         <th className="px-6 py-3 text-right text-xs font-medium uppercase text-zinc-400">Empresas vinculadas</th>
                     </tr>
                 </thead>
@@ -234,7 +234,7 @@ function RelatorioServicos() {
                         servicos.map((s) => (
                             <tr key={s.id}>
                                 <td className="px-6 py-4 font-medium text-zinc-100">{s.nome}</td>
-                                <td className="px-6 py-4 text-sm text-zinc-400">{s.descricao ?? '—'}</td>
+                                <td className="px-6 py-4 text-sm text-zinc-400">{s.horas ?? '—'}</td>
                                 <td className="px-6 py-4 text-right">
                                     <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs text-zinc-400">
                                         {s.empresas_count ?? 0}

@@ -46,6 +46,7 @@ export default function AuthenticatedLayout({ header, children }) {
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink to="/" end>Início</NavLink>
                                 <NavLink to="/empresas">Empresas</NavLink>
+                                <NavLink to="/servicos">Serviços</NavLink>
                                 <NavLink to="/impedimentos">Impedimentos</NavLink>
                                 {isAdmin && (
                                     <NavLink to="/usuarios">Usuários</NavLink>
@@ -152,6 +153,7 @@ export default function AuthenticatedLayout({ header, children }) {
                     <div className="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink to="/" end>Início</ResponsiveNavLink>
                         <ResponsiveNavLink to="/empresas">Empresas</ResponsiveNavLink>
+                        <ResponsiveNavLink to="/servicos">Serviços</ResponsiveNavLink>
                         <ResponsiveNavLink to="/impedimentos">Impedimentos</ResponsiveNavLink>
                         {isAdmin && (
                             <ResponsiveNavLink to="/usuarios">

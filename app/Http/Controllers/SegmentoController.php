@@ -26,16 +26,23 @@ class SegmentoController extends Controller
             $this->rotacaoService->garantirTodasPosicoesFila();
         }
 
-        $segmentos = Segmento::with(['empresas' => function ($query) {
+        $q = Segmento::with(['empresas' => function ($query) {
             $query->orderBy('posicao_fila')->orderBy('id');
-        }])->get();
+        }]);
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->where('user_id', $user->id);
+        }
 
-        return response()->json($segmentos);
+        return response()->json($q->get());
     }
 
     public function store(StoreSegmentoRequest $request): JsonResponse
     {
-        $segmento = Segmento::create($request->validated());
+        $segmento = Segmento::create([
+            'nome'    => $request->validated()['nome'],
+            'user_id' => Auth::id(),
+        ]);
         $segmento->setRelation('empresas', collect());
 
         AuditLog::create([

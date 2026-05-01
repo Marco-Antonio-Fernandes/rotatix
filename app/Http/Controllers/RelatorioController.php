@@ -22,16 +22,26 @@ class RelatorioController extends Controller
 
     public function prestadoresPorCategoria(): JsonResponse
     {
-        $dados = Empresa::with('segmento')
-            ->get()
-            ->groupBy(fn($e) => $e->segmento?->nome ?? 'Sem categoria');
+        $q = Empresa::with('segmento');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        $dados = $q->get()->groupBy(fn ($e) => $e->segmento?->nome ?? 'Sem categoria');
 
         return response()->json($dados);
     }
 
     public function catalogoServicos(): JsonResponse
     {
-        return response()->json(Servico::with('segmento')->get());
+        $q = Servico::with('segmento');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return response()->json($q->get());
     }
 
     public function resetarSemana(): JsonResponse
@@ -53,18 +63,27 @@ class RelatorioController extends Controller
 
     public function impedimentos(): JsonResponse
     {
-        return response()->json(
-            Impedimento::with(['empresa', 'usuario'])->orderByDesc('data')->get()
-        );
+        $q = Impedimento::with(['empresa', 'usuario'])->orderByDesc('data');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('empresa.segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return response()->json($q->get());
     }
 
     public function consolidadoMensal(Request $request): JsonResponse
     {
         $mes = $request->query('mes', now()->format('Y-m'));
 
-        $dados = LancamentoHora::with('empresa')
-            ->whereRaw('DATE_FORMAT(data, "%Y-%m") = ?', [$mes])
-            ->get()
+        $q = LancamentoHora::with('empresa')
+            ->whereRaw('DATE_FORMAT(data, "%Y-%m") = ?', [$mes]);
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('empresa.segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        $dados = $q->get()
             ->groupBy('empresa_id')
             ->map(fn($lancamentos) => [
                 'empresa'    => $lancamentos->first()->empresa,

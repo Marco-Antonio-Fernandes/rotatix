@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 /**
  * Substitui as anotações @NotBlank, @NotNull, @Size do Java (Bean Validation).
@@ -28,7 +30,16 @@ class StoreEmpresaRequest extends FormRequest
             'responsavel_tecnico'        => ['nullable', 'string'],
             'horas_semanais_acumuladas'  => ['sometimes', 'numeric', 'min:0'],
             'status_ciclo_concluido'     => ['sometimes', 'boolean'],
-            'segmento_id'               => ['nullable', 'exists:segmentos,id'],
+            'segmento_id'               => [
+                'nullable',
+                Rule::exists('segmentos', 'id')->where(function ($query) {
+                    $u = Auth::user();
+                    if ($u === null || $u->perfil === 'admin') {
+                        return;
+                    }
+                    $query->where('user_id', $u->id);
+                }),
+            ],
         ];
     }
 

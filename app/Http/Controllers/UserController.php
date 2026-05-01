@@ -39,6 +39,10 @@ class UserController extends Controller
 
     public function destroy(User $user): JsonResponse
     {
+        if ($user->id === Auth::id()) {
+            abort(422, 'Não é possível remover o próprio usuário.');
+        }
+
         AuditLog::create([
             'user_id'     => Auth::id(),
             'acao'        => 'destroy',

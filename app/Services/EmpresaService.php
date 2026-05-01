@@ -57,7 +57,13 @@ class EmpresaService
      */
     public function listarTodas(): Collection
     {
-        return Empresa::all();
+        $q = Empresa::query()->with('segmento');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return $q->get();
     }
 
     public function remover(Empresa $empresa): void

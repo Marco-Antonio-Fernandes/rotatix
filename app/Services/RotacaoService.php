@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Empresa;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class RotacaoService
 {
@@ -23,7 +25,7 @@ class RotacaoService
     {
         $chave = $this->chaveSemanaAtual();
 
-        return Empresa::query()->update([
+        return $this->empresaBaseQuery()->update([
             'horas_semana'              => 0,
             'horas_semanais_acumuladas' => 0,
             'deslocamento_fila'         => 0,
@@ -32,9 +34,20 @@ class RotacaoService
         ]);
     }
 
-    private function queryMesmoSegmento(?int $segmentoId)
+    private function empresaBaseQuery(): Builder
     {
         $q = Empresa::query();
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return $q;
+    }
+
+    private function queryMesmoSegmento(?int $segmentoId): Builder
+    {
+        $q = $this->empresaBaseQuery();
 
         if ($segmentoId !== null) {
             return $q->where('segmento_id', $segmentoId);
@@ -67,11 +80,11 @@ class RotacaoService
 
     public function garantirTodasPosicoesFila(): void
     {
-        $ids = Empresa::query()->whereNotNull('segmento_id')->distinct()->pluck('segmento_id');
+        $ids = $this->empresaBaseQuery()->whereNotNull('segmento_id')->distinct()->pluck('segmento_id');
         foreach ($ids as $sid) {
             $this->garantirPosicoesFilaNoSegmento((int) $sid);
         }
-        if (Empresa::query()->whereNull('segmento_id')->exists()) {
+        if ($this->empresaBaseQuery()->whereNull('segmento_id')->exists()) {
             $this->garantirPosicoesFilaNoSegmento(null);
         }
     }
@@ -107,12 +120,12 @@ class RotacaoService
 
     public function fila(): Collection
     {
-        return Empresa::orderBy('posicao_fila')->get();
+        return $this->empresaBaseQuery()->orderBy('posicao_fila')->get();
     }
 
     public function empresaAtiva(): ?Empresa
     {
-        return Empresa::where('posicao_fila', 1)->first();
+        return $this->empresaBaseQuery()->where('posicao_fila', 1)->first();
     }
 
     public function validarVez(Empresa $empresa): bool
@@ -120,7 +133,7 @@ class RotacaoService
         $this->garantirPosicoesFilaNoSegmento($empresa->segmento_id);
         $empresa->refresh();
 
-        $q = Empresa::query()
+        $q = $this->empresaBaseQuery()
             ->where('horas_semanais_acumuladas', '<', self::LIMITE_HORAS_SEMANA);
 
         if ($empresa->segmento_id !== null) {

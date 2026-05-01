@@ -11,21 +11,21 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('empresas', [EmpresaController::class, 'index']);
-Route::get('empresas/{empresa}', [EmpresaController::class, 'show']);
-Route::get('segmentos', [SegmentoController::class, 'index']);
-Route::get('servicos', [ServicoController::class, 'index']);
-Route::get('impedimentos', [ImpedimentoController::class, 'index']);
-Route::get('relatorios/prestadores-por-categoria', [RelatorioController::class, 'prestadoresPorCategoria']);
-Route::get('relatorios/catalogo-servicos', [RelatorioController::class, 'catalogoServicos']);
-Route::get('relatorios/impedimentos', [RelatorioController::class, 'impedimentos']);
-Route::get('relatorios/consolidado-mensal', [RelatorioController::class, 'consolidadoMensal']);
-Route::get('lancamento-horas', [LancamentoHoraController::class, 'index']);
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
+    Route::get('empresas', [EmpresaController::class, 'index']);
+    Route::get('empresas/{empresa}', [EmpresaController::class, 'show']);
+    Route::get('segmentos', [SegmentoController::class, 'index']);
+    Route::get('servicos', [ServicoController::class, 'index']);
+    Route::get('impedimentos', [ImpedimentoController::class, 'index']);
+    Route::get('relatorios/prestadores-por-categoria', [RelatorioController::class, 'prestadoresPorCategoria']);
+    Route::get('relatorios/catalogo-servicos', [RelatorioController::class, 'catalogoServicos']);
+    Route::get('relatorios/impedimentos', [RelatorioController::class, 'impedimentos']);
+    Route::get('relatorios/consolidado-mensal', [RelatorioController::class, 'consolidadoMensal']);
+    Route::get('lancamento-horas', [LancamentoHoraController::class, 'index']);
 
     Route::middleware('operador')->group(function () {
         Route::post('empresas', [EmpresaController::class, 'store']);

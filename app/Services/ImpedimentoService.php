@@ -13,7 +13,13 @@ class ImpedimentoService
 {
     public function listar(): Collection
     {
-        return Impedimento::with(['empresa', 'usuario'])->orderByDesc('data')->get();
+        $q = Impedimento::with(['empresa', 'usuario'])->orderByDesc('data');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('empresa.segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return $q->get();
     }
 
     public function registrar(array $dados): Impedimento

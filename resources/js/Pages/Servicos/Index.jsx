@@ -11,10 +11,13 @@ export default function ServicosIndex() {
 
     useEffect(() => {
         document.title = `Serviços — ${import.meta.env.VITE_APP_NAME ?? 'Rotatix'}`;
-        axios.get('/api/servicos').then(({ data }) => {
-            setServicos(data);
-            setCarregando(false);
-        });
+        axios
+            .get('/api/servicos')
+            .then(({ data }) => {
+                setServicos(data);
+            })
+            .catch(() => setServicos([]))
+            .finally(() => setCarregando(false));
     }, []);
 
     async function remover(id) {
@@ -49,7 +52,12 @@ export default function ServicosIndex() {
                                 <thead className="bg-zinc-800/80">
                                     <tr>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Nome</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Descrição</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">
+                                            Segmento
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">
+                                            Horas
+                                        </th>
                                         <th className="px-6 py-3 text-left text-xs font-medium uppercase text-zinc-400">Empresas</th>
                                         <th className="px-6 py-3 text-right text-xs font-medium uppercase text-zinc-400">Ações</th>
                                     </tr>
@@ -65,7 +73,12 @@ export default function ServicosIndex() {
                                         servicos.map((s) => (
                                             <tr key={s.id}>
                                                 <td className="px-6 py-4 font-medium text-zinc-100">{s.nome}</td>
-                                                <td className="px-6 py-4 text-sm text-zinc-400">{s.descricao ?? '—'}</td>
+                                                <td className="px-6 py-4 text-sm text-zinc-400">
+                                                    {s.segmento?.nome ?? '—'}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-zinc-400">
+                                                    {s.horas ?? '—'}
+                                                </td>
                                                 <td className="px-6 py-4 text-sm text-zinc-400">
                                                     <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs">
                                                         {s.empresas_count ?? 0}

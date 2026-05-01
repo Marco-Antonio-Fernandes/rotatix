@@ -64,6 +64,11 @@ class LancamentoHoraService
             $q->whereMonth('data', $mes)->whereYear('data', $ano);
         }
 
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('empresa.segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
         return $q->get();
     }
 }

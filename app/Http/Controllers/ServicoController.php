@@ -15,12 +15,23 @@ class ServicoController extends Controller
 {
     public function index(): JsonResponse
     {
-        return response()->json(Servico::withCount('empresas')->get());
+        $q = Servico::query()->with(['segmento'])->withCount('empresas');
+        $user = Auth::user();
+        if ($user !== null && $user->perfil !== 'admin') {
+            $q->whereHas('segmento', fn ($s) => $s->where('user_id', $user->id));
+        }
+
+        return response()->json($q->get());
     }
 
     public function store(StoreServicoRequest $request): JsonResponse
     {
-        $servico = Servico::create($request->validated());
+        $d       = $request->validated();
+        $servico = Servico::create([
+            'segmento_id' => $d['segmento_id'],
+            'nome'        => $d['nome'],
+            'horas'       => isset($d['horas']) ? (float) $d['horas'] : 0.0,
+        ]);
 
         AuditLog::create([
             'user_id'     => Auth::id(),
@@ -35,9 +46,13 @@ class ServicoController extends Controller
     public function update(Request $request, Servico $servico): JsonResponse
     {
         $data = $request->validate([
-            'nome'      => ['sometimes', 'string', 'max:150'],
-            'descricao' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'nome'  => ['sometimes', 'string', 'max:150'],
+            'horas' => ['sometimes', 'numeric', 'min:0'],
         ]);
+
+        if (array_key_exists('horas', $data)) {
+            $data['horas'] = (float) $data['horas'];
+        }
 
         $servico->update($data);
 

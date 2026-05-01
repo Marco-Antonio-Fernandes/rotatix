@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const inputCls =
@@ -18,16 +18,28 @@ function Campo({ label, children, erro }) {
 
 export default function ServicosCreate() {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ nome: '', descricao: '' });
+    const [segmentos, setSegmentos] = useState([]);
+    const [form, setForm] = useState({ segmento_id: '', nome: '', horas: '' });
     const [erros, setErros] = useState({});
     const [salvando, setSalvando] = useState(false);
+
+    useEffect(() => {
+        axios.get('/api/segmentos').then(({ data }) => setSegmentos(data));
+    }, []);
 
     async function salvar(e) {
         e.preventDefault();
         setSalvando(true);
         setErros({});
         try {
-            await axios.post('/api/servicos', form);
+            const payload = {
+                segmento_id: Number(form.segmento_id),
+                nome: form.nome,
+            };
+            if (form.horas !== '' && form.horas !== null) {
+                payload.horas = Number(form.horas);
+            }
+            await axios.post('/api/servicos', payload);
             navigate('/servicos');
         } catch (err) {
             if (err.response?.data?.errors) setErros(err.response.data.errors);
@@ -44,6 +56,23 @@ export default function ServicosCreate() {
                 <div className="mx-auto max-w-lg sm:px-6 lg:px-8">
                     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-sm">
                         <form onSubmit={salvar} className="space-y-4">
+                            <Campo label="Segmento *" erro={erros.segmento_id?.[0]}>
+                                <select
+                                    required
+                                    value={form.segmento_id}
+                                    onChange={(e) =>
+                                        setForm((p) => ({ ...p, segmento_id: e.target.value }))
+                                    }
+                                    className={inputCls}
+                                >
+                                    <option value="">Selecione…</option>
+                                    {segmentos.map((s) => (
+                                        <option key={s.id} value={s.id}>
+                                            {s.nome}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Campo>
                             <Campo label="Nome *" erro={erros.nome?.[0]}>
                                 <input
                                     value={form.nome}
@@ -53,12 +82,15 @@ export default function ServicosCreate() {
                                     required
                                 />
                             </Campo>
-                            <Campo label="Descrição" erro={erros.descricao?.[0]}>
-                                <textarea
-                                    value={form.descricao}
-                                    onChange={(e) => setForm((p) => ({ ...p, descricao: e.target.value }))}
+                            <Campo label="Horas (opcional)" erro={erros.horas?.[0]}>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    step={0.5}
+                                    value={form.horas}
+                                    onChange={(e) => setForm((p) => ({ ...p, horas: e.target.value }))}
                                     className={inputCls}
-                                    rows={3}
+                                    placeholder="0"
                                 />
                             </Campo>
                             <div className="flex justify-end gap-3 pt-2">

@@ -12,6 +12,8 @@ import EmpresasVinculos from './Pages/Empresas/Vinculos';
 import LancamentoHorasCreate from './Pages/LancamentoHoras/Create';
 import ImpedimentosIndex from './Pages/Impedimentos/Index';
 import ImpedimentosCreate from './Pages/Impedimentos/Create';
+import ServicosCreate from './Pages/Servicos/Create';
+import ServicosIndex from './Pages/Servicos/Index';
 import UsuariosIndex from './Pages/Usuarios/Index';
 import UsuariosCreate from './Pages/Usuarios/Create';
 import RelatoriosIndex from './Pages/Relatorios/Index';
@@ -136,6 +138,8 @@ function AppRoutes() {
             <Route path="/empresas/criar" element={<P><EmpresasCreate /></P>} />
             <Route path="/empresas/:id" element={<P><EmpresasShow /></P>} />
             <Route path="/empresas/:id/vinculos" element={<P><EmpresasVinculos /></P>} />
+            <Route path="/servicos" element={<P><ServicosIndex /></P>} />
+            <Route path="/servicos/criar" element={<P><ServicosCreate /></P>} />
             <Route path="/lancamento-horas/criar" element={<P><LancamentoHorasCreate /></P>} />
             <Route path="/impedimentos" element={<P><ImpedimentosIndex /></P>} />
             <Route path="/impedimentos/criar" element={<P><ImpedimentosCreate /></P>} />
